@@ -1,0 +1,290 @@
+#+REVEAL_THEME: league
+#+OPTIONS: toc:nil num:nil
+#+TITLE: Nix Introduction
+#+AUTHOR: David Johnson & Kevin Quick
+* nix is a package manager
+  * nix-env is the primary tool
+    - it composes the other tools.
+    - can run others directly; usually not needed
+  * input is the nix language
+    - declarative static expressions
+    - dynamic typing
+      - resolved at runtime
+      - no implicit coersion
+  * output is a build
+    - derivation: recorded pure result of evaluation
+    - output: running an engine to realize the derivation
+    - fully specified, fully reproducable
+* Roadmap
+  #+ATTR_REVEAL: :frag (highlight-green none none none none)
+    1. Define a pure language
+    2. Evaluate language to determine goals
+    3. Effect goals in IO
+    4. Store results
+    5. Compose results into environments
+* nix language
+  https://nixos.org/nix/manual
+  * sets of attr/val
+    #+BEGIN_SRC nix
+      > a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
+    #+END_SRC
+  * standard set operation: //
+    #+BEGIN_SRC nix
+      > b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
+      > a // b
+      { r = [...]; x = 3; y = "foo"; z = ... }
+    #+END_SRC
+  * functions
+    #+BEGIN_EXAMPLE
+      > f = i: j: i + j.x
+      > f 9 a
+      10
+    #+END_EXAMPLE
+  * lazy evaluation
+  * let and rec bindings
+* nix language files
+  * convention: file stores a function
+    #+BEGIN_EXAMPLE
+      $ cat > myfun.nix
+      { i, j }:
+      i + j.x
+    #+END_EXAMPLE
+  * conventionally one argument: a set of values
+    #+BEGIN_EXAMPLE
+      > g = import myfun.nix
+      > g { i=9; j=a; }
+      10
+      > c = {i=9;}
+      > g (c // { j=a; })
+      10
+    #+END_EXAMPLE
+  * "inherit x y;" is syntactic sugar for "x=x; y=y;"
+    #+BEGIN_EXAMPLE
+      > j = a
+      > g { inherit j; i=9; } == g { i=9; j=j; }
+      true
+    #+END_EXAMPLE
+* Roadmap
+#+ATTR_REVEAL: :frag (none highlight-green highlight-green none none)
+    1. Define a pure language
+    2. Evaluate language to determine goals
+    3. Effect goals in IO
+    4. Store results
+    5. Compose results into environments
+* nix effects (aka. IO)
+  * core set of builders (aka. "stdenv")
+  * look for specific attributes and use them
+    #+BEGIN_EXAMPLE
+      > mkDerivation { known_attrs... }
+    #+END_EXAMPLE
+  * builders can define stages 
+    * invoke sub-builders
+    * builders can look for other attributes
+  * Determine build goal
+    #+BEGIN_EXAMPLE
+    $ nix-env -iA nix.pkgs.git
+    #+END_EXAMPLE
+    Evaluates the ~git~ attribute of the set referenced by the ~pkgs~
+    attribute of the nix set to get a derivation (set of known
+    attributes) to invoke the builders on.
+* Roadmap
+#+ATTR_REVEAL: :frag (none none none highlight-green none)
+    1. Define a pure language
+    2. Evaluate language to determine goals
+    3. Effect goals in IO
+    4. Store results
+    5. Compose results into environments
+* nix-env command
+  * Input is which derivation to run builders on
+  * nix-env puts build output into the "store"
+  * Nothing is in scope
+    - dependencies passed in to derivation as args
+    - args reference store locations
+    - nix-env recursively builds dependencies
+  * each store entry identified by hash
+    #+BEGIN_EXAMPLE
+      $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
+        bin/ etc/ lib/ libexec/ share/
+    #+END_EXAMPLE
+** Unique hashes
+  * every package and every version has unique hash
+    * closure over build-time inputs
+      #+BEGIN_EXAMPLE
+      $ ls /nix/store/<TAB>
+      Display all 7644 possibilities? (y or n)
+      #+END_EXAMPLE
+  * can have multiple versions
+    * each store location is isolated
+    * all dependencies are _explicit_ in the derivation
+** Sample specification
+  #+BEGIN_SRC nix
+{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
+, libjpeg, readline, libtool
+}:
+
+stdenv.mkDerivation rec {
+  name = "gphoto2-2.5.11";
+
+  src = fetchurl {
+    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
+    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
+  };
+
+  nativeBuildInputs = [ pkgconfig gettext libtool ];
+  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
+
+  meta = with stdenv.lib; {
+    description = "A ready to use set of digital camera software applications";
+    homepage = http://www.gphoto.org/;
+    license = licenses.gpl2Plus;
+    platforms = platforms.unix;
+    maintainers = [ maintainers.jcumming ];
+  };
+}
+  #+END_SRC
+* Roadmap
+#+ATTR_REVEAL: :frag (none none none none highlight-green)
+    1. Define a pure language
+    2. Evaluate language to determine goals
+    3. Effect goals in IO
+    4. Store results
+    5. Compose results into environments
+* environments provide useability
+  * Each exe or lib has a unique store location
+  * Want a useable environment
+    - a useful collection of tools
+    - bash + ls + gcc
+  * nix-env creates profile version
+    - one location full of symlinks
+    #+BEGIN_EXAMPLE
+      $ ls -CF /nix/var/nix/profiles/per-user/kquick/profile-23-link/
+      bin/ fonts/ lib/ sbin/ share/
+      $ ls -CF !$/bin/
+      cabal@  emacs@ git@ ...
+    #+END_EXAMPLE
+** Current profile updated
+  * nix-env updates current profile
+    #+BEGIN_EXAMPLE
+      $ echo $PATH
+      ...:/home/kquick/.nix-profile:...
+      $ ls -l /home/kquick/.nix-profile
+      ... -> /nix/var/nix/profiles/per-user/kquick/profile
+      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile
+      ... -> /nix/var/nix/profiles/per-user/kquick/profile-23-link
+    #+END_EXAMPLE
+  * users can install packages, not just admin
+* Environments Are Preserved
+  * All the profiles are in the store as well
+    #+BEGIN_EXAMPLE
+      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile-23-link
+      ... -> /nix/store/k99lmcrwjag521z56c4964ja2yzrwjjp-user-environment
+    #+END_EXAMPLE
+  * Build a package and add to a new profile version
+    #+BEGIN_EXAMPLE
+    $ nix-env -i PKG
+    #+END_EXAMPLE
+  * List /adjust profile generations
+    #+BEGIN_EXAMPLE
+    $ nix-env -L
+    $ nix-env --rollback
+    $ nix-env -G 5
+    #+END_EXAMPLE
+    * Just changes the ~/home/kquick/.nix-profile~ link.
+* nix-pkgs
+  * Huge collection of files
+  * Each file is a function
+  * Each function is (ultimately) the mkDerivation
+  * channels: tarball of packages
+    * Updates of packages
+      #+BEGIN_EXAMPLE
+       $ nix-channel --update
+      #+END_EXAMPLE
+    * Stored in the store
+    * Can rollback
+  * hydra
+    * public package builder daemon
+    * supplies binaries and bdiffs to nix-env
+** Huge collection of files
+    - https://github.com/nixos/nixpkgs
+    - Jul 29, 2017:
+      - 111685 commits
+      - ~300/wk
+      - 1290 contributors
+* NixOS
+  * Built on nix language
+  * Adds "system" profile, containing kernel, boot image
+  * Builder to update grub to use new boot image
+  * Builder to write /etc configuration files from nix
+  * Uses same profile symlinks
+    * All kernels and boots available in the store
+    * Rollback (or forward) is trivial (grub menu entries)
+  * +Can+ Should use nixpkgs outside of NixOS
+* cabal2nix
+  * Add on tool to create a nix specification from a cabal file
+  * Input sources:
+     * local directory path
+     * hackage via cabal://pkgname[-version]
+     * web via http  (e.g. github)
+  * hydra polls hackage to build specs
+    * Most packages already in nix
+    * For new packages or newer versions, use cabal2nix to generate a
+      local file
+* installing a local haskell project
+  * high-level config specifying new/missing components
+    #+BEGIN_EXAMPLE
+     $ nix-env -f myfile -iA haskellPackages.project_a
+    #+END_EXAMPLE
+  * copies source to store
+    * assigns hash
+    * builds from that source
+    * maintains closure chain/reproducability
+* developing a local haskell project
+  * nix-shell
+  * instantiates the build environment
+    (i.e. builds all dependencies)
+  * does not build current target
+  * normal "cabal build" process
+  * dependencies just need a .nix specification
+    * + don't need to be checked out to build locally
+    * + built once
+    * - full rebuild if changed, no partial rebuilds
+* crucible/tanager
+  * top level package config
+  * bash script to run cabal2nix for localdirs or (if not present),
+    github or hackage.
+  * https://github.com/kquick/tanager-nix
+  * Use Gabriel Gonzalez's excellent description:
+    https://github.com/Gabriel439/haskell-nix
+* REPL
+  * REPL tool for language and inspection
+    #+BEGIN_EXAMPLE
+    $ nix-repl
+    > :l <nixpkgs>
+    > pkgs.git.m<TAB>
+    pkgs.git.makeFlags pkgs.git.meta
+    > pkgs.git.meta.description
+    "Distributed version control system"
+    #+END_EXAMPLE
+* Miscellaneous
+  * Local builds are not incremental
+  * Attributes are specific but not versioned
+    * When needed, a new version-specific attribute is created
+  * Store can get big (that's called efficiency)
+    #+BEGIN_EXAMPLE
+    $ nix-env --delete-generation 20
+    $ nix-collect-garbage
+    #+END_EXAMPLE
+    - The GC roots are the profile versions.
+    - Filesystem dirent refcnts determine when no longer used.
+* THE END
+  * Nix language
+    - https://nixos.org/nix/manual
+  * Nix package specification (builders, attributes, language support,
+    etc.)
+    - https://nixos.org/nixpkgs/manual/
+  * Nix package list
+    - https://nixos.org/nixos/packages.html
+  * NixOS
+    - https://nixos.org
+  * Nix declarative deployment (viz. Kubernetes)
+    - https://nixos.org/nixops
