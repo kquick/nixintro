@@ -1,0 +1,21 @@
+This is a presentation designed to provide a quick introduction to the
+use of the Nix package manager.
+
+It's an org-mode presentation.  The HTML version uses the [[https://github.com/hakimel/reveal.js][reveal.js]]
+package to make a nice slide presentation.  The output is generated
+via the ox-reveal publishing package for org-mode, with the following
+setup:
+
+#+BEGIN_SRC lisp
+(use-package ox-reveal
+ : ensure ox-reveal
+ : config
+ (progn
+    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")))
+#+END_SRC
+
+With this configuration, the HTML output can be generated when editing
+the ~nixtalk.org~ source file by the key sequence: `C-c C-e R R` to
+invoke org-export-dispatch and select the Reveal output, writing it to
+a file.
+
