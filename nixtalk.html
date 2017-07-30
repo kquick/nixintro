@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nix Introduction</title>
+<meta name="author" content="(David Johnson & Kevin Quick)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/league.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-07-29 Sat 18:40</p>
+</section>
+<section>
+<section id="slide-orga25bb65">
+<h2 id="orga25bb65">nix is a package manager</h2>
+<ul>
+<li>nix-env is the primary tool
+<ul>
+<li>it composes the other tools.</li>
+<li>can run others directly; usually not needed</li>
+
+</ul></li>
+<li>input is the nix language
+<ul>
+<li>declarative static expressions</li>
+<li>dynamic typing
+<ul>
+<li>resolved at runtime</li>
+<li>no implicit coersion</li>
+
+</ul></li>
+
+</ul></li>
+<li>output is a build
+<ul>
+<li>derivation: recorded pure result of evaluation</li>
+<li>output: running an engine to realize the derivation</li>
+<li>fully specified, fully reproducable</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgc606b74">
+<h2 id="orgc606b74">Roadmap</h2>
+<ol>
+<li class="fragment highlight-green">Define a pure language</li>
+<li>Evaluate language to determine goals</li>
+<li>Effect goals in IO</li>
+<li>Store results</li>
+<li>Compose results into environments</li>
+
+</ol>
+</section>
+</section>
+<section>
+<section id="slide-orgf63c7f5">
+<h2 id="orgf63c7f5">nix language</h2>
+<p>
+<a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a>
+</p>
+<ul>
+<li><p>
+sets of attr/val
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-nix">&gt; a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
+</pre>
+</div></li>
+<li><p>
+standard set operation: //
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-nix">&gt; b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
+&gt; a // b
+{ r = [...]; x = 3; y = "foo"; z = ... }
+</pre>
+</div></li>
+<li><p>
+functions
+</p>
+<pre class="example">
+&gt; f = i: j: i + j.x
+&gt; f 9 a
+10
+</pre></li>
+<li>lazy evaluation</li>
+<li>let and rec bindings</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org1390e28">
+<h2 id="org1390e28">nix language files</h2>
+<ul>
+<li><p>
+convention: file stores a function
+</p>
+<pre class="example">
+$ cat &gt; myfun.nix
+{ i, j }:
+i + j.x
+</pre></li>
+<li><p>
+conventionally one argument: a set of values
+</p>
+<pre class="example">
+&gt; g = import myfun.nix
+&gt; g { i=9; j=a; }
+10
+&gt; c = {i=9;}
+&gt; g (c // { j=a; })
+10
+</pre></li>
+<li><p>
+"inherit x y;" is syntactic sugar for "x=x; y=y;"
+</p>
+<pre class="example">
+&gt; j = a
+&gt; g { inherit j; i=9; } == g { i=9; j=j; }
+true
+</pre></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgc351451">
+<h2 id="orgc351451">Roadmap</h2>
+<ol>
+<li>Define a pure language</li>
+<li class="fragment highlight-green">Evaluate language to determine goals</li>
+<li class="fragment highlight-green">Effect goals in IO</li>
+<li>Store results</li>
+<li>Compose results into environments</li>
+
+</ol>
+</section>
+</section>
+<section>
+<section id="slide-org0e7697a">
+<h2 id="org0e7697a">nix effects (aka. IO)</h2>
+<ul>
+<li>core set of builders (aka. "stdenv")</li>
+<li><p>
+look for specific attributes and use them
+</p>
+<pre class="example">
+&gt; mkDerivation { known_attrs... }
+</pre></li>
+<li>builders can define stages 
+<ul>
+<li>invoke sub-builders</li>
+<li>builders can look for other attributes</li>
+
+</ul></li>
+<li><p>
+Determine build goal
+</p>
+<pre class="example">
+$ nix-env -iA nix.pkgs.git
+</pre>
+<p>
+Evaluates the <code>git</code> attribute of the set referenced by the <code>pkgs</code>
+attribute of the nix set to get a derivation (set of known
+attributes) to invoke the builders on.
+</p></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org8d57c39">
+<h2 id="org8d57c39">Roadmap</h2>
+<ol>
+<li>Define a pure language</li>
+<li>Evaluate language to determine goals</li>
+<li>Effect goals in IO</li>
+<li class="fragment highlight-green">Store results</li>
+<li>Compose results into environments</li>
+
+</ol>
+</section>
+</section>
+<section>
+<section id="slide-org2834e3b">
+<h2 id="org2834e3b">nix-env command</h2>
+<ul>
+<li>Input is which derivation to run builders on</li>
+<li>nix-env puts build output into the "store"</li>
+<li>Nothing is in scope
+<ul>
+<li>dependencies passed in to derivation as args</li>
+<li>args reference store locations</li>
+<li>nix-env recursively builds dependencies</li>
+
+</ul></li>
+<li><p>
+each store entry identified by hash
+</p>
+<pre class="example">
+$ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
+  bin/ etc/ lib/ libexec/ share/
+</pre></li>
+
+</ul>
+</section>
+<section id="slide-org3b23b9a">
+<h3 id="org3b23b9a">Unique hashes</h3>
+<ul>
+<li>every package and every version has unique hash
+<ul>
+<li><p>
+closure over build-time inputs
+</p>
+<pre class="example">
+$ ls /nix/store/&lt;TAB&gt;
+Display all 7644 possibilities? (y or n)
+</pre></li>
+
+</ul></li>
+<li>can have multiple versions
+<ul>
+<li>each store location is isolated</li>
+<li>all dependencies are <span class="underline">explicit</span> in the derivation</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org3e1ad15">
+<h3 id="org3e1ad15">Sample specification</h3>
+<div class="org-src-container">
+
+<pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
+, libjpeg, readline, libtool
+}:
+
+stdenv.mkDerivation rec {
+  name = "gphoto2-2.5.11";
+
+  src = fetchurl {
+    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
+    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
+  };
+
+  nativeBuildInputs = [ pkgconfig gettext libtool ];
+  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
+
+  meta = with stdenv.lib; {
+    description = "A ready to use set of digital camera software applications";
+    homepage = http://www.gphoto.org/;
+    license = licenses.gpl2Plus;
+    platforms = platforms.unix;
+    maintainers = [ maintainers.jcumming ];
+  };
+}
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org44c0d64">
+<h2 id="org44c0d64">Roadmap</h2>
+<ol>
+<li>Define a pure language</li>
+<li>Evaluate language to determine goals</li>
+<li>Effect goals in IO</li>
+<li>Store results</li>
+<li class="fragment highlight-green">Compose results into environments</li>
+
+</ol>
+</section>
+</section>
+<section>
+<section id="slide-org7e4caca">
+<h2 id="org7e4caca">environments provide useability</h2>
+<ul>
+<li>Each exe or lib has a unique store location</li>
+<li>Want a useable environment
+<ul>
+<li>a useful collection of tools</li>
+<li>bash + ls + gcc</li>
+
+</ul></li>
+<li><p>
+nix-env creates profile version
+</p>
+<ul>
+<li>one location full of symlinks</li>
+
+</ul>
+<pre class="example">
+$ ls -CF /nix/var/nix/profiles/per-user/kquick/profile-23-link/
+bin/ fonts/ lib/ sbin/ share/
+$ ls -CF !$/bin/
+cabal@  emacs@ git@ ...
+</pre></li>
+
+</ul>
+</section>
+<section id="slide-org9974e0f">
+<h3 id="org9974e0f">Current profile updated</h3>
+<ul>
+<li><p>
+nix-env updates current profile
+</p>
+<pre class="example">
+$ echo $PATH
+...:/home/kquick/.nix-profile:...
+$ ls -l /home/kquick/.nix-profile
+... -&gt; /nix/var/nix/profiles/per-user/kquick/profile
+$ ls -l /nix/var/nix/profiles/per-user/kquick/profile
+... -&gt; /nix/var/nix/profiles/per-user/kquick/profile-23-link
+</pre></li>
+<li>users can install packages, not just admin</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orge0a9a09">
+<h2 id="orge0a9a09">Environments Are Preserved</h2>
+<ul>
+<li><p>
+All the profiles are in the store as well
+</p>
+<pre class="example">
+$ ls -l /nix/var/nix/profiles/per-user/kquick/profile-23-link
+... -&gt; /nix/store/k99lmcrwjag521z56c4964ja2yzrwjjp-user-environment
+</pre></li>
+<li><p>
+Build a package and add to a new profile version
+</p>
+<pre class="example">
+$ nix-env -i PKG
+</pre></li>
+<li><p>
+List /adjust profile generations
+</p>
+<pre class="example">
+$ nix-env -L
+$ nix-env --rollback
+$ nix-env -G 5
+</pre>
+<ul>
+<li>Just changes the <code>/home/kquick/.nix-profile</code> link.</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgcbc36ad">
+<h2 id="orgcbc36ad">nix-pkgs</h2>
+<ul>
+<li>Huge collection of files</li>
+<li>Each file is a function</li>
+<li>Each function is (ultimately) the mkDerivation</li>
+<li>channels: tarball of packages
+<ul>
+<li><p>
+Updates of packages
+</p>
+<pre class="example">
+$ nix-channel --update
+</pre></li>
+<li>Stored in the store</li>
+<li>Can rollback</li>
+
+</ul></li>
+<li>hydra
+<ul>
+<li>public package builder daemon</li>
+<li>supplies binaries and bdiffs to nix-env</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgecdfbb8">
+<h3 id="orgecdfbb8">Huge collection of files</h3>
+<ul>
+<li><a href="https://github.com/nixos/nixpkgs">https://github.com/nixos/nixpkgs</a></li>
+<li>Jul 29, 2017:
+<ul>
+<li>111685 commits</li>
+<li>~300/wk</li>
+<li>1290 contributors</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgf0675b6">
+<h2 id="orgf0675b6">NixOS</h2>
+<ul>
+<li>Built on nix language</li>
+<li>Adds "system" profile, containing kernel, boot image</li>
+<li>Builder to update grub to use new boot image</li>
+<li>Builder to write /etc configuration files from nix</li>
+<li>Uses same profile symlinks
+<ul>
+<li>All kernels and boots available in the store</li>
+<li>Rollback (or forward) is trivial (grub menu entries)</li>
+
+</ul></li>
+<li><del>Can</del> Should use nixpkgs outside of NixOS</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orge78e842">
+<h2 id="orge78e842">cabal2nix</h2>
+<ul>
+<li>Add on tool to create a nix specification from a cabal file</li>
+<li>Input sources:
+<ul>
+<li>local directory path</li>
+<li>hackage via cabal://pkgname[-version]</li>
+<li>web via http  (e.g. github)</li>
+
+</ul></li>
+<li>hydra polls hackage to build specs
+<ul>
+<li>Most packages already in nix</li>
+<li>For new packages or newer versions, use cabal2nix to generate a
+local file</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orge950d6f">
+<h2 id="orge950d6f">installing a local haskell project</h2>
+<ul>
+<li><p>
+high-level config specifying new/missing components
+</p>
+<pre class="example">
+$ nix-env -f myfile -iA haskellPackages.project_a
+</pre></li>
+<li>copies source to store
+<ul>
+<li>assigns hash</li>
+<li>builds from that source</li>
+<li>maintains closure chain/reproducability</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org5646bfd">
+<h2 id="org5646bfd">developing a local haskell project</h2>
+<ul>
+<li>nix-shell</li>
+<li>instantiates the build environment
+(i.e. builds all dependencies)</li>
+<li>does not build current target</li>
+<li>normal "cabal build" process</li>
+<li>dependencies just need a .nix specification
+<ul>
+<li>+ don't need to be checked out to build locally</li>
+<li>+ built once</li>
+<li>- full rebuild if changed, no partial rebuilds</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org135d118">
+<h2 id="org135d118">crucible/tanager</h2>
+<ul>
+<li>top level package config</li>
+<li>bash script to run cabal2nix for localdirs or (if not present),
+github or hackage.</li>
+<li><a href="https://github.com/kquick/tanager-nix">https://github.com/kquick/tanager-nix</a></li>
+<li>Use Gabriel Gonzalez's excellent description:
+<a href="https://github.com/Gabriel439/haskell-nix">https://github.com/Gabriel439/haskell-nix</a></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgc3a35c8">
+<h2 id="orgc3a35c8">REPL</h2>
+<ul>
+<li><p>
+REPL tool for language and inspection
+</p>
+<pre class="example">
+$ nix-repl
+&gt; :l &lt;nixpkgs&gt;
+&gt; pkgs.git.m&lt;TAB&gt;
+pkgs.git.makeFlags pkgs.git.meta
+&gt; pkgs.git.meta.description
+"Distributed version control system"
+</pre></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org9369b65">
+<h2 id="org9369b65">Miscellaneous</h2>
+<ul>
+<li>Local builds are not incremental</li>
+<li>Attributes are specific but not versioned
+<ul>
+<li>When needed, a new version-specific attribute is created</li>
+
+</ul></li>
+<li><p>
+Store can get big (that's called efficiency)
+</p>
+<pre class="example">
+$ nix-env --delete-generation 20
+$ nix-collect-garbage
+</pre>
+<ul>
+<li>The GC roots are the profile versions.</li>
+<li>Filesystem dirent refcnts determine when no longer used.</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org11ebb88">
+<h2 id="org11ebb88">THE END</h2>
+<ul>
+<li>Nix language
+<ul>
+<li><a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a></li>
+
+</ul></li>
+<li>Nix package specification (builders, attributes, language support,
+etc.)
+<ul>
+<li><a href="https://nixos.org/nixpkgs/manual/">https://nixos.org/nixpkgs/manual/</a></li>
+
+</ul></li>
+<li>Nix package list
+<ul>
+<li><a href="https://nixos.org/nixos/packages.html">https://nixos.org/nixos/packages.html</a></li>
+
+</ul></li>
+<li>NixOS
+<ul>
+<li><a href="https://nixos.org">https://nixos.org</a></li>
+
+</ul></li>
+<li>Nix declarative deployment (viz. Kubernetes)
+<ul>
+<li><a href="https://nixos.org/nixops">https://nixos.org/nixops</a></li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
