@@ -2,19 +2,28 @@
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
 #+AUTHOR: David Johnson & Kevin Quick
+* Sales Pitch
+  * Why use nix to install packages?
+  * Reproducible builds
+  * Full dependency integrity
+  * Large integrated language ecosystem
+  * Parallel versions of the same package
+  * Global caching
+  * Encompasses: builds, deployments, system management
 * nix is a package manager
-  * nix-env is the primary tool
-    - it composes the other tools.
-    - can run others directly; usually not needed
-  * input is the nix language
+  * (... and a language, and an OS)
+  * nix is a package manager
+    - nix-env high level: calls the other tools.
+    - nix-shell, nix-store, nix-build
+  * nix language
     - declarative static expressions
     - dynamic typing
       - resolved at runtime
       - no implicit coersion
-  * output is a build
+    - A DSL to generate ~IO PKG~
+  * Invoke builders
     - derivation: recorded pure result of evaluation
     - output: running an engine to realize the derivation
-    - fully specified, fully reproducable
 * Roadmap
   #+ATTR_REVEAL: :frag (highlight-green none none none none)
     1. Define a pure language
@@ -73,20 +82,28 @@
     5. Compose results into environments
 * nix effects (aka. IO)
   * core set of builders (aka. "stdenv")
+    [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/NixOS/nixpkgs/blob/master]]
+    [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
   * look for specific attributes and use them
-    #+BEGIN_EXAMPLE
-      > mkDerivation { known_attrs... }
-    #+END_EXAMPLE
-  * builders can define stages 
+  * builders
+    * look for specific attributes
+    * can define stages 
     * invoke sub-builders
-    * builders can look for other attributes
+* build specification
   * Determine build goal
     #+BEGIN_EXAMPLE
     $ nix-env -iA nix.pkgs.git
     #+END_EXAMPLE
-    Evaluates the ~git~ attribute of the set referenced by the ~pkgs~
-    attribute of the nix set to get a derivation (set of known
-    attributes) to invoke the builders on.
+  * Specifies the derivation to run the builder on
+    #+BEGIN_SRC nix
+    nix = { ...
+        pkgs = { ...
+            git = mkDerivation { name="git"; src=...; ...}
+            ...
+        };
+    }
+    #+END_SRC
+  * Here "nix" is actually a "channel" name (described later)
 * Roadmap
 #+ATTR_REVEAL: :frag (none none none highlight-green none)
     1. Define a pure language
@@ -97,6 +114,7 @@
 * nix-env command
   * Input is which derivation to run builders on
   * nix-env puts build output into the "store"
+    - System global directory tree
   * Nothing is in scope
     - dependencies passed in to derivation as args
     - args reference store locations
@@ -173,6 +191,7 @@ stdenv.mkDerivation rec {
       ... -> /nix/var/nix/profiles/per-user/kquick/profile-23-link
     #+END_EXAMPLE
   * users can install packages, not just admin
+  * can copy a closure to another machine
 * Environments Are Preserved
   * All the profiles are in the store as well
     #+BEGIN_EXAMPLE
@@ -190,9 +209,8 @@ stdenv.mkDerivation rec {
     $ nix-env -G 5
     #+END_EXAMPLE
     * Just changes the ~/home/kquick/.nix-profile~ link.
-* nix-pkgs
-  * Huge collection of files
-  * Each file is a function
+* nix pkgs
+  * A large set of ready-made derivations
   * Each function is (ultimately) the mkDerivation
   * channels: tarball of packages
     * Updates of packages
@@ -201,6 +219,7 @@ stdenv.mkDerivation rec {
       #+END_EXAMPLE
     * Stored in the store
     * Can rollback
+    * Multiple channels
   * hydra
     * public package builder daemon
     * supplies binaries and bdiffs to nix-env
@@ -219,17 +238,23 @@ stdenv.mkDerivation rec {
     * All kernels and boots available in the store
     * Rollback (or forward) is trivial (grub menu entries)
   * +Can+ Should use nixpkgs outside of NixOS
+* Language ecosystems
+  * Each language has its own "package" concept
+  * Nix has tools/language elements to support different languages
+  * Check online documentation for your language
 * cabal2nix
-  * Add on tool to create a nix specification from a cabal file
+  * Tool to builds a nix specification from a cabal file
+  * hydra polls hackage to build packages
+    * Using cabal2nix on stackage LTS
+    * pkgs.haskellPackages.PKG  (11,257 pkgs)
+      https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix
+    * For new packages or newer versions
+      - use cabal2nix to generate a local file
   * Input sources:
      * local directory path
      * hackage via cabal://pkgname[-version]
      * web via http  (e.g. github)
-  * hydra polls hackage to build specs
-    * Most packages already in nix
-    * For new packages or newer versions, use cabal2nix to generate a
-      local file
-* installing a local haskell project
+* INSTALLING a local haskell project
   * high-level config specifying new/missing components
     #+BEGIN_EXAMPLE
      $ nix-env -f myfile -iA haskellPackages.project_a
@@ -238,7 +263,7 @@ stdenv.mkDerivation rec {
     * assigns hash
     * builds from that source
     * maintains closure chain/reproducability
-* developing a local haskell project
+* DEVELOPING a local haskell project
   * nix-shell
   * instantiates the build environment
     (i.e. builds all dependencies)
@@ -255,6 +280,8 @@ stdenv.mkDerivation rec {
   * https://github.com/kquick/tanager-nix
   * Use Gabriel Gonzalez's excellent description:
     https://github.com/Gabriel439/haskell-nix
+  * Also John Wiegley's work:
+    https://github.com/jwiegley/nix-config
 * REPL
   * REPL tool for language and inspection
     #+BEGIN_EXAMPLE
@@ -271,11 +298,14 @@ stdenv.mkDerivation rec {
     * When needed, a new version-specific attribute is created
   * Store can get big (that's called efficiency)
     #+BEGIN_EXAMPLE
-    $ nix-env --delete-generation 20
+    $ nix-env --delete-generations 19 20 17
+    $ nix-env --delete-generations 30d
     $ nix-collect-garbage
     #+END_EXAMPLE
     - The GC roots are the profile versions.
-    - Filesystem dirent refcnts determine when no longer used.
+    - Filesystem dirent refcnts determine when removeable.
+  * Prefer nix-shell to nix-env
+    - Keep your main environment minimal
 * THE END
   * Nix language
     - https://nixos.org/nix/manual
