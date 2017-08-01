@@ -26,19 +26,35 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-07-29 Sat 18:40</p>
+<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-08-01 Tue 12:57</p>
 </section>
 <section>
-<section id="slide-orga25bb65">
-<h2 id="orga25bb65">nix is a package manager</h2>
+<section id="slide-org72d87f0">
+<h2 id="org72d87f0">Sales Pitch</h2>
 <ul>
-<li>nix-env is the primary tool
+<li>Why use nix to install packages?</li>
+<li>Reproducible builds</li>
+<li>Full dependency integrity</li>
+<li>Large integrated language ecosystem</li>
+<li>Parallel versions of the same package</li>
+<li>Global caching</li>
+<li>Encompasses: builds, deployments, system management</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgd8de2bd">
+<h2 id="orgd8de2bd">nix is a package manager</h2>
 <ul>
-<li>it composes the other tools.</li>
-<li>can run others directly; usually not needed</li>
+<li>(&#x2026; and a language, and an OS)</li>
+<li>nix is a package manager
+<ul>
+<li>nix-env high level: calls the other tools.</li>
+<li>nix-shell, nix-store, nix-build</li>
 
 </ul></li>
-<li>input is the nix language
+<li>nix language
 <ul>
 <li>declarative static expressions</li>
 <li>dynamic typing
@@ -47,13 +63,13 @@
 <li>no implicit coersion</li>
 
 </ul></li>
+<li>A DSL to generate <code>IO PKG</code></li>
 
 </ul></li>
-<li>output is a build
+<li>Invoke builders
 <ul>
 <li>derivation: recorded pure result of evaluation</li>
 <li>output: running an engine to realize the derivation</li>
-<li>fully specified, fully reproducable</li>
 
 </ul></li>
 
@@ -61,8 +77,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgc606b74">
-<h2 id="orgc606b74">Roadmap</h2>
+<section id="slide-org7337316">
+<h2 id="org7337316">Roadmap</h2>
 <ol>
 <li class="fragment highlight-green">Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -74,8 +90,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgf63c7f5">
-<h2 id="orgf63c7f5">nix language</h2>
+<section id="slide-org4439235">
+<h2 id="org4439235">nix language</h2>
 <p>
 <a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a>
 </p>
@@ -85,7 +101,7 @@ sets of attr/val
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">&gt; a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
+<pre  class="src src-nix">      &gt; a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
 </pre>
 </div></li>
 <li><p>
@@ -93,18 +109,18 @@ standard set operation: //
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">&gt; b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
-&gt; a // b
-{ r = [...]; x = 3; y = "foo"; z = ... }
+<pre  class="src src-nix">      &gt; b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
+      &gt; a // b
+      { r = [...]; x = 3; y = "foo"; z = ... }
 </pre>
 </div></li>
 <li><p>
 functions
 </p>
 <pre class="example">
-&gt; f = i: j: i + j.x
-&gt; f 9 a
-10
+      &gt; f = i: j: i + j.x
+      &gt; f 9 a
+      10
 </pre></li>
 <li>lazy evaluation</li>
 <li>let and rec bindings</li>
@@ -113,43 +129,43 @@ functions
 </section>
 </section>
 <section>
-<section id="slide-org1390e28">
-<h2 id="org1390e28">nix language files</h2>
+<section id="slide-org7f032d2">
+<h2 id="org7f032d2">nix language files</h2>
 <ul>
 <li><p>
 convention: file stores a function
 </p>
 <pre class="example">
-$ cat &gt; myfun.nix
-{ i, j }:
-i + j.x
+      $ cat &gt; myfun.nix
+      { i, j }:
+      i + j.x
 </pre></li>
 <li><p>
 conventionally one argument: a set of values
 </p>
 <pre class="example">
-&gt; g = import myfun.nix
-&gt; g { i=9; j=a; }
-10
-&gt; c = {i=9;}
-&gt; g (c // { j=a; })
-10
+      &gt; g = import myfun.nix
+      &gt; g { i=9; j=a; }
+      10
+      &gt; c = {i=9;}
+      &gt; g (c // { j=a; })
+      10
 </pre></li>
 <li><p>
 "inherit x y;" is syntactic sugar for "x=x; y=y;"
 </p>
 <pre class="example">
-&gt; j = a
-&gt; g { inherit j; i=9; } == g { i=9; j=j; }
-true
+      &gt; j = a
+      &gt; g { inherit j; i=9; } == g { i=9; j=j; }
+      true
 </pre></li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-orgc351451">
-<h2 id="orgc351451">Roadmap</h2>
+<section id="slide-org5ebccbe">
+<h2 id="org5ebccbe">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li class="fragment highlight-green">Evaluate language to determine goals</li>
@@ -161,40 +177,55 @@ true
 </section>
 </section>
 <section>
-<section id="slide-org0e7697a">
-<h2 id="org0e7697a">nix effects (aka. IO)</h2>
+<section id="slide-org2ac1a16">
+<h2 id="org2ac1a16">nix effects (aka. IO)</h2>
 <ul>
-<li>core set of builders (aka. "stdenv")</li>
-<li><p>
-look for specific attributes and use them
-</p>
-<pre class="example">
-&gt; mkDerivation { known_attrs... }
-</pre></li>
-<li>builders can define stages 
+<li>core set of builders (aka. "stdenv")
+<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh"><a href="https://github.com/NixOS/nixpkgs/blob/master">https://github.com/NixOS/nixpkgs/blob/master</a></a>
+<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh">/pkgs/stdenv/generic/setup.sh</a></li>
+<li>look for specific attributes and use them</li>
+<li>builders
 <ul>
+<li>look for specific attributes</li>
+<li>can define stages</li>
 <li>invoke sub-builders</li>
-<li>builders can look for other attributes</li>
 
 </ul></li>
-<li><p>
-Determine build goal
-</p>
-<pre class="example">
-$ nix-env -iA nix.pkgs.git
-</pre>
-<p>
-Evaluates the <code>git</code> attribute of the set referenced by the <code>pkgs</code>
-attribute of the nix set to get a derivation (set of known
-attributes) to invoke the builders on.
-</p></li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-org8d57c39">
-<h2 id="org8d57c39">Roadmap</h2>
+<section id="slide-org9575b0a">
+<h2 id="org9575b0a">build specification</h2>
+<ul>
+<li><p>
+Determine build goal
+</p>
+<pre class="example">
+    $ nix-env -iA nix.pkgs.git
+</pre></li>
+<li><p>
+Specifies the derivation to run the builder on
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-nix">    nix = { ...
+        pkgs = { ...
+            git = mkDerivation { name="git"; src=...; ...}
+            ...
+        };
+    }
+</pre>
+</div></li>
+<li>Here "nix" is actually a "channel" name (described later)</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org4e8f900">
+<h2 id="org4e8f900">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -206,11 +237,15 @@ attributes) to invoke the builders on.
 </section>
 </section>
 <section>
-<section id="slide-org2834e3b">
-<h2 id="org2834e3b">nix-env command</h2>
+<section id="slide-org10d149b">
+<h2 id="org10d149b">nix-env command</h2>
 <ul>
 <li>Input is which derivation to run builders on</li>
-<li>nix-env puts build output into the "store"</li>
+<li>nix-env puts build output into the "store"
+<ul>
+<li>System global directory tree</li>
+
+</ul></li>
 <li>Nothing is in scope
 <ul>
 <li>dependencies passed in to derivation as args</li>
@@ -222,14 +257,14 @@ attributes) to invoke the builders on.
 each store entry identified by hash
 </p>
 <pre class="example">
-$ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
-  bin/ etc/ lib/ libexec/ share/
+      $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
+        bin/ etc/ lib/ libexec/ share/
 </pre></li>
 
 </ul>
 </section>
-<section id="slide-org3b23b9a">
-<h3 id="org3b23b9a">Unique hashes</h3>
+<section id="slide-org3bed9cf">
+<h3 id="org3bed9cf">Unique hashes</h3>
 <ul>
 <li>every package and every version has unique hash
 <ul>
@@ -237,8 +272,8 @@ $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
 closure over build-time inputs
 </p>
 <pre class="example">
-$ ls /nix/store/&lt;TAB&gt;
-Display all 7644 possibilities? (y or n)
+      $ ls /nix/store/&lt;TAB&gt;
+      Display all 7644 possibilities? (y or n)
 </pre></li>
 
 </ul></li>
@@ -251,8 +286,8 @@ Display all 7644 possibilities? (y or n)
 
 </ul>
 </section>
-<section id="slide-org3e1ad15">
-<h3 id="org3e1ad15">Sample specification</h3>
+<section id="slide-orgc6e38d5">
+<h3 id="orgc6e38d5">Sample specification</h3>
 <div class="org-src-container">
 
 <pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
@@ -283,8 +318,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-org44c0d64">
-<h2 id="org44c0d64">Roadmap</h2>
+<section id="slide-orgb8b8786">
+<h2 id="orgb8b8786">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -296,8 +331,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-org7e4caca">
-<h2 id="org7e4caca">environments provide useability</h2>
+<section id="slide-org1c92fc6">
+<h2 id="org1c92fc6">environments provide useability</h2>
 <ul>
 <li>Each exe or lib has a unique store location</li>
 <li>Want a useable environment
@@ -314,57 +349,58 @@ nix-env creates profile version
 
 </ul>
 <pre class="example">
-$ ls -CF /nix/var/nix/profiles/per-user/kquick/profile-23-link/
-bin/ fonts/ lib/ sbin/ share/
-$ ls -CF !$/bin/
-cabal@  emacs@ git@ ...
+      $ ls -CF /nix/var/nix/profiles/per-user/kquick/profile-23-link/
+      bin/ fonts/ lib/ sbin/ share/
+      $ ls -CF !$/bin/
+      cabal@  emacs@ git@ ...
 </pre></li>
 
 </ul>
 </section>
-<section id="slide-org9974e0f">
-<h3 id="org9974e0f">Current profile updated</h3>
+<section id="slide-org124f275">
+<h3 id="org124f275">Current profile updated</h3>
 <ul>
 <li><p>
 nix-env updates current profile
 </p>
 <pre class="example">
-$ echo $PATH
-...:/home/kquick/.nix-profile:...
-$ ls -l /home/kquick/.nix-profile
-... -&gt; /nix/var/nix/profiles/per-user/kquick/profile
-$ ls -l /nix/var/nix/profiles/per-user/kquick/profile
-... -&gt; /nix/var/nix/profiles/per-user/kquick/profile-23-link
+      $ echo $PATH
+      ...:/home/kquick/.nix-profile:...
+      $ ls -l /home/kquick/.nix-profile
+      ... -&gt; /nix/var/nix/profiles/per-user/kquick/profile
+      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile
+      ... -&gt; /nix/var/nix/profiles/per-user/kquick/profile-23-link
 </pre></li>
 <li>users can install packages, not just admin</li>
+<li>can copy a closure to another machine</li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-orge0a9a09">
-<h2 id="orge0a9a09">Environments Are Preserved</h2>
+<section id="slide-orgd7b7d55">
+<h2 id="orgd7b7d55">Environments Are Preserved</h2>
 <ul>
 <li><p>
 All the profiles are in the store as well
 </p>
 <pre class="example">
-$ ls -l /nix/var/nix/profiles/per-user/kquick/profile-23-link
-... -&gt; /nix/store/k99lmcrwjag521z56c4964ja2yzrwjjp-user-environment
+      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile-23-link
+      ... -&gt; /nix/store/k99lmcrwjag521z56c4964ja2yzrwjjp-user-environment
 </pre></li>
 <li><p>
 Build a package and add to a new profile version
 </p>
 <pre class="example">
-$ nix-env -i PKG
+    $ nix-env -i PKG
 </pre></li>
 <li><p>
 List /adjust profile generations
 </p>
 <pre class="example">
-$ nix-env -L
-$ nix-env --rollback
-$ nix-env -G 5
+    $ nix-env -L
+    $ nix-env --rollback
+    $ nix-env -G 5
 </pre>
 <ul>
 <li>Just changes the <code>/home/kquick/.nix-profile</code> link.</li>
@@ -375,11 +411,10 @@ $ nix-env -G 5
 </section>
 </section>
 <section>
-<section id="slide-orgcbc36ad">
-<h2 id="orgcbc36ad">nix-pkgs</h2>
+<section id="slide-org3728da7">
+<h2 id="org3728da7">nix pkgs</h2>
 <ul>
-<li>Huge collection of files</li>
-<li>Each file is a function</li>
+<li>A large set of ready-made derivations</li>
 <li>Each function is (ultimately) the mkDerivation</li>
 <li>channels: tarball of packages
 <ul>
@@ -387,10 +422,11 @@ $ nix-env -G 5
 Updates of packages
 </p>
 <pre class="example">
-$ nix-channel --update
+       $ nix-channel --update
 </pre></li>
 <li>Stored in the store</li>
 <li>Can rollback</li>
+<li>Multiple channels</li>
 
 </ul></li>
 <li>hydra
@@ -402,8 +438,8 @@ $ nix-channel --update
 
 </ul>
 </section>
-<section id="slide-orgecdfbb8">
-<h3 id="orgecdfbb8">Huge collection of files</h3>
+<section id="slide-org747acd9">
+<h3 id="org747acd9">Huge collection of files</h3>
 <ul>
 <li><a href="https://github.com/nixos/nixpkgs">https://github.com/nixos/nixpkgs</a></li>
 <li>Jul 29, 2017:
@@ -418,8 +454,8 @@ $ nix-channel --update
 </section>
 </section>
 <section>
-<section id="slide-orgf0675b6">
-<h2 id="orgf0675b6">NixOS</h2>
+<section id="slide-orgf5c0fea">
+<h2 id="orgf5c0fea">NixOS</h2>
 <ul>
 <li>Built on nix language</li>
 <li>Adds "system" profile, containing kernel, boot image</li>
@@ -437,10 +473,33 @@ $ nix-channel --update
 </section>
 </section>
 <section>
-<section id="slide-orge78e842">
-<h2 id="orge78e842">cabal2nix</h2>
+<section id="slide-org2e11c4c">
+<h2 id="org2e11c4c">Language ecosystems</h2>
 <ul>
-<li>Add on tool to create a nix specification from a cabal file</li>
+<li>Each language has its own "package" concept</li>
+<li>Nix has tools/language elements to support different languages</li>
+<li>Check online documentation for your language</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org0ace25e">
+<h2 id="org0ace25e">cabal2nix</h2>
+<ul>
+<li>Tool to builds a nix specification from a cabal file</li>
+<li>hydra polls hackage to build packages
+<ul>
+<li>Using cabal2nix on stackage LTS</li>
+<li>pkgs.haskellPackages.PKG  (11,257 pkgs)
+<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix">https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix</a></li>
+<li>For new packages or newer versions
+<ul>
+<li>use cabal2nix to generate a local file</li>
+
+</ul></li>
+
+</ul></li>
 <li>Input sources:
 <ul>
 <li>local directory path</li>
@@ -448,26 +507,19 @@ $ nix-channel --update
 <li>web via http  (e.g. github)</li>
 
 </ul></li>
-<li>hydra polls hackage to build specs
-<ul>
-<li>Most packages already in nix</li>
-<li>For new packages or newer versions, use cabal2nix to generate a
-local file</li>
-
-</ul></li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-orge950d6f">
-<h2 id="orge950d6f">installing a local haskell project</h2>
+<section id="slide-orgf55f8be">
+<h2 id="orgf55f8be">INSTALLING a local haskell project</h2>
 <ul>
 <li><p>
 high-level config specifying new/missing components
 </p>
 <pre class="example">
-$ nix-env -f myfile -iA haskellPackages.project_a
+     $ nix-env -f myfile -iA haskellPackages.project_a
 </pre></li>
 <li>copies source to store
 <ul>
@@ -481,8 +533,8 @@ $ nix-env -f myfile -iA haskellPackages.project_a
 </section>
 </section>
 <section>
-<section id="slide-org5646bfd">
-<h2 id="org5646bfd">developing a local haskell project</h2>
+<section id="slide-org15deb26">
+<h2 id="org15deb26">DEVELOPING a local haskell project</h2>
 <ul>
 <li>nix-shell</li>
 <li>instantiates the build environment
@@ -501,8 +553,8 @@ $ nix-env -f myfile -iA haskellPackages.project_a
 </section>
 </section>
 <section>
-<section id="slide-org135d118">
-<h2 id="org135d118">crucible/tanager</h2>
+<section id="slide-org0c45533">
+<h2 id="org0c45533">crucible/tanager</h2>
 <ul>
 <li>top level package config</li>
 <li>bash script to run cabal2nix for localdirs or (if not present),
@@ -510,32 +562,34 @@ github or hackage.</li>
 <li><a href="https://github.com/kquick/tanager-nix">https://github.com/kquick/tanager-nix</a></li>
 <li>Use Gabriel Gonzalez's excellent description:
 <a href="https://github.com/Gabriel439/haskell-nix">https://github.com/Gabriel439/haskell-nix</a></li>
+<li>Also John Wiegley's work:
+<a href="https://github.com/jwiegley/nix-config">https://github.com/jwiegley/nix-config</a></li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-orgc3a35c8">
-<h2 id="orgc3a35c8">REPL</h2>
+<section id="slide-orga478527">
+<h2 id="orga478527">REPL</h2>
 <ul>
 <li><p>
 REPL tool for language and inspection
 </p>
 <pre class="example">
-$ nix-repl
-&gt; :l &lt;nixpkgs&gt;
-&gt; pkgs.git.m&lt;TAB&gt;
-pkgs.git.makeFlags pkgs.git.meta
-&gt; pkgs.git.meta.description
-"Distributed version control system"
+    $ nix-repl
+    &gt; :l &lt;nixpkgs&gt;
+    &gt; pkgs.git.m&lt;TAB&gt;
+    pkgs.git.makeFlags pkgs.git.meta
+    &gt; pkgs.git.meta.description
+    "Distributed version control system"
 </pre></li>
 
 </ul>
 </section>
 </section>
 <section>
-<section id="slide-org9369b65">
-<h2 id="org9369b65">Miscellaneous</h2>
+<section id="slide-orgb3d5f78">
+<h2 id="orgb3d5f78">Miscellaneous</h2>
 <ul>
 <li>Local builds are not incremental</li>
 <li>Attributes are specific but not versioned
@@ -547,12 +601,18 @@ pkgs.git.makeFlags pkgs.git.meta
 Store can get big (that's called efficiency)
 </p>
 <pre class="example">
-$ nix-env --delete-generation 20
-$ nix-collect-garbage
+    $ nix-env --delete-generations 19 20 17
+    $ nix-env --delete-generations 30d
+    $ nix-collect-garbage
 </pre>
 <ul>
 <li>The GC roots are the profile versions.</li>
-<li>Filesystem dirent refcnts determine when no longer used.</li>
+<li>Filesystem dirent refcnts determine when removeable.</li>
+
+</ul></li>
+<li>Prefer nix-shell to nix-env
+<ul>
+<li>Keep your main environment minimal</li>
 
 </ul></li>
 
@@ -560,8 +620,8 @@ $ nix-collect-garbage
 </section>
 </section>
 <section>
-<section id="slide-org11ebb88">
-<h2 id="org11ebb88">THE END</h2>
+<section id="slide-org7a9fb7f">
+<h2 id="org7a9fb7f">THE END</h2>
 <ul>
 <li>Nix language
 <ul>
