@@ -1,4 +1,4 @@
-#+REVEAL_THEME: league
+#+REVEAL_THEME: night
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
 #+AUTHOR: David Johnson & Kevin Quick
@@ -167,48 +167,22 @@ stdenv.mkDerivation rec {
     3. Effect goals in IO
     4. Store results
     5. Compose results into environments
-* environments provide useability
+* profiles expose packages
   * Each exe or lib has a unique store location
-  * Want a useable environment
-    - a useful collection of tools
-    - bash + ls + gcc
-  * nix-env creates profile version
-    - one location full of symlinks
-    #+BEGIN_EXAMPLE
-      $ ls -CF /nix/var/nix/profiles/per-user/kquick/profile-23-link/
-      bin/ fonts/ lib/ sbin/ share/
-      $ ls -CF !$/bin/
-      cabal@  emacs@ git@ ...
-    #+END_EXAMPLE
-** Current profile updated
-  * nix-env updates current profile
-    #+BEGIN_EXAMPLE
-      $ echo $PATH
-      ...:/home/kquick/.nix-profile:...
-      $ ls -l /home/kquick/.nix-profile
-      ... -> /nix/var/nix/profiles/per-user/kquick/profile
-      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile
-      ... -> /nix/var/nix/profiles/per-user/kquick/profile-23-link
-    #+END_EXAMPLE
-  * users can install packages, not just admin
-  * can copy a closure to another machine
-* Environments Are Preserved
-  * All the profiles are in the store as well
-    #+BEGIN_EXAMPLE
-      $ ls -l /nix/var/nix/profiles/per-user/kquick/profile-23-link
-      ... -> /nix/store/k99lmcrwjag521z56c4964ja2yzrwjjp-user-environment
-    #+END_EXAMPLE
-  * Build a package and add to a new profile version
-    #+BEGIN_EXAMPLE
-    $ nix-env -i PKG
-    #+END_EXAMPLE
-  * List /adjust profile generations
-    #+BEGIN_EXAMPLE
-    $ nix-env -L
-    $ nix-env --rollback
-    $ nix-env -G 5
-    #+END_EXAMPLE
-    * Just changes the ~/home/kquick/.nix-profile~ link.
+  * Want a useable environment to run multiple tools
+  * nix-env creates profiles
+    [[file:nix-user-environments.png]]
+* Minimizing for Effectiveness
+  * Conventional package managers install globally
+  * This is an anti-pattern using nix
+  * nix installs into global store, and then exposes locally
+    - use only for generics, like vi and emacs
+  * let projects specify the packages and versions needed
+    - nix-build
+      - local "~result~" symlink instead of profile
+    - nix-shell
+      - shell with build environment, but doesn't build current
+        package
 * nix pkgs
   * A large set of ready-made derivations
   * Each function is (ultimately) the mkDerivation
