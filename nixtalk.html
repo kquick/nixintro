@@ -26,11 +26,11 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-08-02 Wed 12:33</p>
+<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-08-03 Thu 09:11</p>
 </section>
 <section>
-<section id="slide-orge7d2b70">
-<h2 id="orge7d2b70">Sales Pitch</h2>
+<section id="slide-orgd696291">
+<h2 id="orgd696291">Sales Pitch</h2>
 <ul>
 <li>Why use nix to install packages?</li>
 <li>Reproducible builds</li>
@@ -44,8 +44,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgf73ecfb">
-<h2 id="orgf73ecfb">nix is a package manager</h2>
+<section id="slide-org6f83344">
+<h2 id="org6f83344">nix is a package manager</h2>
 <ul>
 <li>(&#x2026; and a language, and an OS)</li>
 <li>nix is a package manager
@@ -77,8 +77,8 @@
 </section>
 </section>
 <section>
-<section id="slide-org617a3ef">
-<h2 id="org617a3ef">Roadmap</h2>
+<section id="slide-orgc581a84">
+<h2 id="orgc581a84">Roadmap</h2>
 <ol>
 <li class="fragment highlight-green">Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -90,8 +90,8 @@
 </section>
 </section>
 <section>
-<section id="slide-org1456abc">
-<h2 id="org1456abc">nix language</h2>
+<section id="slide-org28e20be">
+<h2 id="org28e20be">nix language</h2>
 <p>
 <a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a>
 </p>
@@ -129,8 +129,8 @@ functions
 </section>
 </section>
 <section>
-<section id="slide-org7a9fdc5">
-<h2 id="org7a9fdc5">nix language files</h2>
+<section id="slide-orga47859a">
+<h2 id="orga47859a">nix language files</h2>
 <ul>
 <li><p>
 convention: file stores a function
@@ -164,8 +164,8 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-orge644b0c">
-<h2 id="orge644b0c">Roadmap</h2>
+<section id="slide-org2de4f0a">
+<h2 id="org2de4f0a">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li class="fragment highlight-green">Evaluate language to determine goals</li>
@@ -177,8 +177,8 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-orgb74606b">
-<h2 id="orgb74606b">nix effects (aka. IO)</h2>
+<section id="slide-org07728f1">
+<h2 id="org07728f1">nix effects (aka. IO)</h2>
 <ul>
 <li>core set of builders (aka. "stdenv")
 <a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh"><a href="https://github.com/NixOS/nixpkgs/blob/master">https://github.com/NixOS/nixpkgs/blob/master</a></a>
@@ -196,8 +196,8 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-org7e390b6">
-<h2 id="org7e390b6">build specification</h2>
+<section id="slide-orga2fefe1">
+<h2 id="orga2fefe1">build specification</h2>
 <ul>
 <li><p>
 Determine build goal
@@ -224,8 +224,8 @@ Specifies the derivation to run the builder on
 </section>
 </section>
 <section>
-<section id="slide-org294b167">
-<h2 id="org294b167">Roadmap</h2>
+<section id="slide-org953c7e2">
+<h2 id="org953c7e2">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -237,8 +237,8 @@ Specifies the derivation to run the builder on
 </section>
 </section>
 <section>
-<section id="slide-org9feee7b">
-<h2 id="org9feee7b">nix-env command</h2>
+<section id="slide-org65e0269">
+<h2 id="org65e0269">nix-env command</h2>
 <ul>
 <li>Input is which derivation to run builders on</li>
 <li>nix-env puts build output into the "store"
@@ -263,8 +263,8 @@ each store entry identified by hash
 
 </ul>
 </section>
-<section id="slide-org048e82e">
-<h3 id="org048e82e">Unique hashes</h3>
+<section id="slide-org57b5d26">
+<h3 id="org57b5d26">Unique hashes</h3>
 <ul>
 <li>every package and every version has unique hash
 <ul>
@@ -286,8 +286,8 @@ closure over build-time inputs
 
 </ul>
 </section>
-<section id="slide-orgde93c23">
-<h3 id="orgde93c23">Sample specification</h3>
+<section id="slide-orgfd92fea">
+<h3 id="orgfd92fea">Sample specification</h3>
 <div class="org-src-container">
 
 <pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
@@ -318,8 +318,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-org3b059fb">
-<h2 id="org3b059fb">Roadmap</h2>
+<section id="slide-orgc576b57">
+<h2 id="orgc576b57">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -331,8 +331,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-orgbc4d28a">
-<h2 id="orgbc4d28a">profiles expose packages</h2>
+<section id="slide-org4ab1713">
+<h2 id="org4ab1713">profiles expose packages</h2>
 <ul>
 <li>Each exe or lib has a unique store location</li>
 <li>Want a useable environment to run multiple tools</li>
@@ -343,8 +343,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-orge413e9e">
-<h2 id="orge413e9e">Minimizing for Effectiveness</h2>
+<section id="slide-orgd75af75">
+<h2 id="orgd75af75">Minimizing for Effectiveness</h2>
 <ul>
 <li>Conventional package managers install globally</li>
 <li>This is an anti-pattern using nix</li>
@@ -373,8 +373,8 @@ package</li>
 </section>
 </section>
 <section>
-<section id="slide-org20f6034">
-<h2 id="org20f6034">nix pkgs</h2>
+<section id="slide-orgbb7946d">
+<h2 id="orgbb7946d">nix pkgs</h2>
 <ul>
 <li>A large set of ready-made derivations</li>
 <li>Each function is (ultimately) the mkDerivation</li>
@@ -400,8 +400,8 @@ Updates of packages
 
 </ul>
 </section>
-<section id="slide-org29e1219">
-<h3 id="org29e1219">Huge collection of files</h3>
+<section id="slide-orgace83d6">
+<h3 id="orgace83d6">Huge collection of files</h3>
 <ul>
 <li><a href="https://github.com/nixos/nixpkgs">https://github.com/nixos/nixpkgs</a></li>
 <li>Jul 29, 2017:
@@ -416,8 +416,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org094317a">
-<h2 id="org094317a">NixOS</h2>
+<section id="slide-org18a5476">
+<h2 id="org18a5476">NixOS</h2>
 <ul>
 <li>Built on nix language</li>
 <li>Adds "system" profile, containing kernel, boot image</li>
@@ -435,8 +435,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org6e0b3da">
-<h2 id="org6e0b3da">Language ecosystems</h2>
+<section id="slide-orgb7d74b7">
+<h2 id="orgb7d74b7">Language ecosystems</h2>
 <ul>
 <li>Each language has its own "package" concept</li>
 <li>Nix has tools/language elements to support different languages</li>
@@ -446,15 +446,17 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org88368ea">
-<h2 id="org88368ea">cabal2nix</h2>
+<section id="slide-orge767f21">
+<h2 id="orge767f21">cabal2nix</h2>
 <ul>
 <li>Tool to builds a nix specification from a cabal file</li>
-<li>hydra polls hackage to build packages
+<li>hydra builds
 <ul>
-<li>Using cabal2nix on stackage LTS</li>
+<li>cabal2nix run on LTS yaml file</li>
+<li>Generates new packages specification</li>
 <li>pkgs.haskellPackages.PKG  (11,257 pkgs)
 <a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix">https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix</a></li>
+<li>hydra rebuilds from new package descriptions</li>
 <li>For new packages or newer versions
 <ul>
 <li>use cabal2nix to generate a local file</li>
@@ -466,7 +468,7 @@ Updates of packages
 <ul>
 <li>local directory path</li>
 <li>hackage via cabal://pkgname[-version]</li>
-<li>web via http  (e.g. github)</li>
+<li>web via http  (e.g. github)  (optional revision)</li>
 
 </ul></li>
 
@@ -474,8 +476,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org6427f5a">
-<h2 id="org6427f5a">INSTALLING a local haskell project</h2>
+<section id="slide-org40e2c78">
+<h2 id="org40e2c78">INSTALLING a local haskell project</h2>
 <ul>
 <li><p>
 high-level config specifying new/missing components
@@ -495,8 +497,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-org4ea6795">
-<h2 id="org4ea6795">DEVELOPING a local haskell project</h2>
+<section id="slide-org38cb6d5">
+<h2 id="org38cb6d5">DEVELOPING a local haskell project</h2>
 <ul>
 <li>nix-shell</li>
 <li>instantiates the build environment
@@ -515,8 +517,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-org614897c">
-<h2 id="org614897c">crucible/tanager</h2>
+<section id="slide-org7c33136">
+<h2 id="org7c33136">crucible/tanager</h2>
 <ul>
 <li>top level package config</li>
 <li>bash script to run cabal2nix for localdirs or (if not present),
@@ -531,8 +533,8 @@ github or hackage.</li>
 </section>
 </section>
 <section>
-<section id="slide-org0ac842c">
-<h2 id="org0ac842c">REPL</h2>
+<section id="slide-org2a252b0">
+<h2 id="org2a252b0">REPL</h2>
 <ul>
 <li><p>
 REPL tool for language and inspection
@@ -550,8 +552,8 @@ REPL tool for language and inspection
 </section>
 </section>
 <section>
-<section id="slide-orgaad845b">
-<h2 id="orgaad845b">Miscellaneous</h2>
+<section id="slide-orgf647f79">
+<h2 id="orgf647f79">Miscellaneous</h2>
 <ul>
 <li>Local builds are not incremental</li>
 <li>Attributes are specific but not versioned
@@ -582,8 +584,8 @@ Store can get big (that's called efficiency)
 </section>
 </section>
 <section>
-<section id="slide-org1ca1cc4">
-<h2 id="org1ca1cc4">THE END</h2>
+<section id="slide-org2ebcb2c">
+<h2 id="org2ebcb2c">THE END</h2>
 <ul>
 <li>Nix language
 <ul>
