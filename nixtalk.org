@@ -218,16 +218,18 @@ stdenv.mkDerivation rec {
   * Check online documentation for your language
 * cabal2nix
   * Tool to builds a nix specification from a cabal file
-  * hydra polls hackage to build packages
-    * Using cabal2nix on stackage LTS
+  * hydra builds
+    * cabal2nix run on LTS yaml file
+    * Generates new packages specification
     * pkgs.haskellPackages.PKG  (11,257 pkgs)
       https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix
+    * hydra rebuilds from new package descriptions
     * For new packages or newer versions
       - use cabal2nix to generate a local file
   * Input sources:
      * local directory path
      * hackage via cabal://pkgname[-version]
-     * web via http  (e.g. github)
+     * web via http  (e.g. github)  (optional revision)
 * INSTALLING a local haskell project
   * high-level config specifying new/missing components
     #+BEGIN_EXAMPLE
