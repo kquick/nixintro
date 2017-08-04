@@ -1,5 +1,11 @@
 #+REVEAL_THEME: night
 #+REVEAL_EXTRA_CSS: ./nixtalk.css
+#+REVEAL_MULTIPLEX_ID: thething
+#+REVEAL_MULTIPLEX_SECRET: sekrit
+#+REVEAL_MULTIPLEX_URL: http://kwq.today
+#+REVEAL_MULTIPLEX_SOCKETIO_URL: http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.10/socket.io.min.js
+#+REVEAL_MULTIPLEX_PLUGINS: (multiplex)
+
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
 #+AUTHOR: Kevin Quick & David Johnson
@@ -347,13 +353,19 @@ stdenv.mkDerivation rec {
 * Examples
   - CyberChaff
    - Build
-     - https://gist.github.com/e6ad693c41b49b925557fd52aaaf6a42
+     #+BEGIN_VERSE
+https://gist.github.com/e6ad693c41b49b925557fd52aaaf6a42
+     #+END_VERSE
   - DDOS-gui (http://ddos.dmj.io)
    - Build
-     - https://gist.github.com/dmjio/3a1d977fe9e537ca2ad6efcd3a708d4b
-   - NixOS module, deployment
-     - https://gist.github.com/dmjio/7c0cb81113c7c46cf35edceb5c7960ac
-     - https://gist.github.com/dmjio/7705f8c112506f8e93ee09271ccdd14e
+     #+BEGIN_VERSE
+https://gist.github.com/dmjio/3a1d977fe9e537ca2ad6efcd3a708d4b
+     #+END_VERSE
+  - NixOS module, deployment
+    #+BEGIN_VERSE
+https://gist.github.com/dmjio/7c0cb81113c7c46cf35edceb5c7960ac
+https://gist.github.com/dmjio/7705f8c112506f8e93ee09271ccdd14e
+    #+END_VERSE
 * THE END
   * Nix language
     - https://nixos.org/nix/manual
