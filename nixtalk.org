@@ -1,7 +1,7 @@
 #+REVEAL_THEME: night
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
-#+AUTHOR: David Johnson & Kevin Quick
+#+AUTHOR: Kevin Quick & David Johnson
 * Sales Pitch
   * Why use nix to install packages?
   * Reproducible builds
@@ -76,90 +76,90 @@
 * Roadmap
 #+ATTR_REVEAL: :frag (none highlight-green highlight-green none none)
     1. Define a pure language
-    2. Evaluate language to determine goals
-    3. Effect goals in IO
+    2. Create Derivations
+    3. Realize Derivations
     4. Store results
     5. Compose results into environments
-* nix effects (aka. IO)
-  * core set of builders (aka. "stdenv")
-    [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/NixOS/nixpkgs/blob/master]]
-    [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
-  * look for specific attributes and use them
-  * builders
-    * look for specific attributes
-    * can define stages 
-    * invoke sub-builders
-* build specification
-  * Determine build goal
+* Create Derivations
+  * What is a Derivation?
+    * A derivation is the instructions on how to build something, and references to every dependency it has.
+    * Derivations are implemented as sets, but treated specially during evaluation.
+      - Perform side effects like producing build output
+    * derivation is the most important primitive in nix
+      - Requires a name
+      - Requires a builder (script for building the package)
+	 - All attributes are passed as environment variables to the build.
+      - Requires a src (can use local source, or perform IO and fetch over network)
+    * In practice you'll use wrappers (i.e. runCommand, writeScriptBin, mkDerivation).
+      * mkDerivation uses setup.sh by default
+	- [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/ixOS/nixpkgs/blob/master]][[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
+    * fetchUrl, fetchFromGitHub, fetchFromGitLab, etc. are fixed output derivations.
+      - Perform network IO, but "pure" because they perform "hash matching".
+  * Sample derivation
     #+BEGIN_EXAMPLE
-    $ nix-env -iA nix.pkgs.git
-    #+END_EXAMPLE
-  * Specifies the derivation to run the builder on
-    #+BEGIN_SRC nix
-    nix = { ...
-        pkgs = { ...
-            git = mkDerivation { name="git"; src=...; ...}
-            ...
-        };
+    # default parameter, lazily imports all of nixpkgs namespace into scope
+    { pkgs ? import <nixpkgs> {} }:
+      # stdenv is passed in automatically
+      pkgs.stdenv.mkDerivation {
+        # name
+	name = "hello-2.9";
+        # src itself is a derivation
+        # All derivations are stored in the /nix/store, before being realized
+	src = pkgs.fetchurl {
+	  url = "mirror://gnu/hello/${name}.tar.gz";
+	  sha256 = "19qy37gkasc4csb1d3bdiz9snn8mir2p3aj0jgzmfv0r2hi7mfzc";
+	};
     }
-    #+END_SRC
-  * Here "nix" is actually a "channel" name (described later)
-* Roadmap
-#+ATTR_REVEAL: :frag (none none none highlight-green none)
-    1. Define a pure language
-    2. Evaluate language to determine goals
-    3. Effect goals in IO
-    4. Store results
-    5. Compose results into environments
-* nix-env command
-  * Input is which derivation to run builders on
-  * nix-env puts build output into the "store"
+    #+END_EXAMPLE
+* nix store
+  * Building a derivation puts build output into the "store"
     - System global directory tree
   * Nothing is in scope
     - dependencies passed in to derivation as args
     - args reference store locations
     - nix-env recursively builds dependencies
+** Unique hashes
   * each store entry identified by hash
     #+BEGIN_EXAMPLE
       $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
-        bin/ etc/ lib/ libexec/ share/
+	bin/ etc/ lib/ libexec/ share/
     #+END_EXAMPLE
-** Unique hashes
   * every package and every version has unique hash
     * closure over build-time inputs
-      #+BEGIN_EXAMPLE
-      $ ls /nix/store/<TAB>
-      Display all 7644 possibilities? (y or n)
-      #+END_EXAMPLE
   * can have multiple versions
     * each store location is isolated
     * all dependencies are _explicit_ in the derivation
-** Sample specification
-  #+BEGIN_SRC nix
-{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
-, libjpeg, readline, libtool
-}:
-
-stdenv.mkDerivation rec {
-  name = "gphoto2-2.5.11";
-
-  src = fetchurl {
-    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
-    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
-  };
-
-  nativeBuildInputs = [ pkgconfig gettext libtool ];
-  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
-
-  meta = with stdenv.lib; {
-    description = "A ready to use set of digital camera software applications";
-    homepage = http://www.gphoto.org/;
-    license = licenses.gpl2Plus;
-    platforms = platforms.unix;
-    maintainers = [ maintainers.jcumming ];
-  };
-}
-  #+END_SRC
+* Realize derivations
+  * Phase distinction, instantiation & realization
+  * nix (https://github.com/nixos/nix)
+    - Heart of nix system, 4 C++ libraries, dozen or so utilities
+  * nix-instantiate
+    - Creates build instructions, calculates hash
+      - https://gist.github.com/dmjio/7e5a024f95fe18aa34f8fea69ecebc74#file-derivation-txt-L2
+      - https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104
+      - Will exploit binary cache if store path exists on networked machines
+  * nix-store -r
+    - Attempts to build ("realize") package from derivation description
+    - Can watch evaluation through setup.sh by tracing "set -x"
+  * nix-build
+    - Equivalent to calling 'nix-store -r $(nix-instantiate default.nix)'
+    - Creates derivation, builds package, installs in store
+  * Builds go through phases
+    - pre/postFetch, pre/postBuild, pre/postInstall. etc/
+    - Package builds are split into phases to make it easier to override specific parts of the build (e.g., unpacking the sources or installing the binaries).
+    - New phases can be defined (haskell packages does this, i.e. haddockPhase)
+    - Default phase behavior can be seen in setup.sh
+  * nix-shell $(nix-instantiate default.nix)
+    - Useful for interactively building derivations
+    - Puts a user into a shell with environment variables from the derivation present
+    - Can run the build with `genericBuild`
+* Roadmap
+  #+ATTR_REVEAL: :frag (none none none highlight-green none)
+    1. Define a pure language
+    2. Evaluate language to determine goals
+    3. Effect goals in IO
+    4. Store results
+    5. Compose results into environments
 * Roadmap
 #+ATTR_REVEAL: :frag (none none none none highlight-green)
     1. Define a pure language
@@ -183,7 +183,7 @@ stdenv.mkDerivation rec {
     - nix-shell
       - shell with build environment, but doesn't build current
         package
-* nix pkgs
+* nixpkgs
   * A large set of ready-made derivations
   * Each function is (ultimately) the mkDerivation
   * channels: tarball of packages
@@ -258,6 +258,33 @@ stdenv.mkDerivation rec {
     https://github.com/Gabriel439/haskell-nix
   * Also John Wiegley's work:
     https://github.com/jwiegley/nix-config
+** Sample specification
+  #+BEGIN_SRC nix
+{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
+, libjpeg, readline, libtool
+}:
+
+stdenv.mkDerivation rec {
+  name = "gphoto2-2.5.11";
+
+  src = fetchurl {
+    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
+    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
+  };
+
+  nativeBuildInputs = [ pkgconfig gettext libtool ];
+  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
+
+  meta = with stdenv.lib; {
+    description = "A ready to use set of digital camera software applications";
+    homepage = http://www.gphoto.org/;
+    license = licenses.gpl2Plus;
+    platforms = platforms.unix;
+    maintainers = [ maintainers.jcumming ];
+  };
+}
+  #+END_SRC
+
 * REPL
   * REPL tool for language and inspection
     #+BEGIN_EXAMPLE
@@ -282,6 +309,16 @@ stdenv.mkDerivation rec {
     - Filesystem dirent refcnts determine when removeable.
   * Prefer nix-shell to nix-env
     - Keep your main environment minimal
+* Examples
+  - CyberChaff
+   - Build
+     - https://gist.github.com/e6ad693c41b49b925557fd52aaaf6a42
+  - DDOS-gui (http://ddos.dmj.io)
+   - Build
+     - https://gist.github.com/dmjio/3a1d977fe9e537ca2ad6efcd3a708d4b
+   - NixOS module, deployment
+     - https://gist.github.com/dmjio/7c0cb81113c7c46cf35edceb5c7960ac
+     - https://gist.github.com/dmjio/7705f8c112506f8e93ee09271ccdd14e
 * THE END
   * Nix language
     - https://nixos.org/nix/manual
