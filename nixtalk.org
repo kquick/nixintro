@@ -284,11 +284,11 @@ $ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] > crucible.nix
     * + don't need to be checked out to build locally
     * + built once
     * - full rebuild if changed, no partial rebuilds
-* crucible/tanager
+* crucible
   * top level package config
   * bash script to run cabal2nix for localdirs or (if not present),
     github or hackage.
-  * https://github.com/kquick/tanager-nix
+  * https://github.com/kquick/crucible_nix
   * Use Gabriel Gonzalez's excellent description:
     https://github.com/Gabriel439/haskell-nix
   * Also John Wiegley's work:
