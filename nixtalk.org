@@ -1,11 +1,5 @@
 #+REVEAL_THEME: night
 #+REVEAL_EXTRA_CSS: ./nixtalk.css
-#+REVEAL_MULTIPLEX_ID: thething
-#+REVEAL_MULTIPLEX_SECRET: sekrit
-#+REVEAL_MULTIPLEX_URL: http://kwq.today
-#+REVEAL_MULTIPLEX_SOCKETIO_URL: http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.10/socket.io.min.js
-#+REVEAL_MULTIPLEX_PLUGINS: (multiplex)
-
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
 #+AUTHOR: Kevin Quick & David Johnson
