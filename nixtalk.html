@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <title>Nix Introduction</title>
-<meta name="author" content="(David Johnson & Kevin Quick)"/>
+<meta name="author" content="(Kevin Quick & David Johnson)"/>
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
@@ -11,6 +11,7 @@
 
 <link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
 
+<link rel="stylesheet" href="./nixtalk.css"/>
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
 <script>
@@ -26,11 +27,11 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">David Johnson &amp; Kevin Quick</h2><p class="date">Created: 2017-08-03 Thu 09:11</p>
+<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">Kevin Quick &amp; David Johnson</h2><p class="date">Created: 2017-08-03 Thu 22:55</p>
 </section>
 <section>
-<section id="slide-orgd696291">
-<h2 id="orgd696291">Sales Pitch</h2>
+<section id="slide-orgc9d8e47">
+<h2 id="orgc9d8e47">Sales Pitch</h2>
 <ul>
 <li>Why use nix to install packages?</li>
 <li>Reproducible builds</li>
@@ -44,8 +45,8 @@
 </section>
 </section>
 <section>
-<section id="slide-org6f83344">
-<h2 id="org6f83344">nix is a package manager</h2>
+<section id="slide-orgbacbffc">
+<h2 id="orgbacbffc">nix is a package manager</h2>
 <ul>
 <li>(&#x2026; and a language, and an OS)</li>
 <li>nix is a package manager
@@ -77,21 +78,21 @@
 </section>
 </section>
 <section>
-<section id="slide-orgc581a84">
-<h2 id="orgc581a84">Roadmap</h2>
+<section id="slide-org8be3ae1">
+<h2 id="org8be3ae1">Roadmap</h2>
 <ol>
 <li class="fragment highlight-green">Define a pure language</li>
-<li>Evaluate language to determine goals</li>
-<li>Effect goals in IO</li>
-<li>Store results</li>
+<li>Evaluate language to determine goals: derivations</li>
+<li>Storing builds</li>
+<li>Realize derivations (IO)</li>
 <li>Compose results into environments</li>
 
 </ol>
 </section>
 </section>
 <section>
-<section id="slide-org28e20be">
-<h2 id="org28e20be">nix language</h2>
+<section id="slide-orgc52d249">
+<h2 id="orgc52d249">nix language</h2>
 <p>
 <a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a>
 </p>
@@ -101,7 +102,7 @@ sets of attr/val
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">      &gt; a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
+<pre  class="src src-nix">      &gt; <span style="color: #fcaf3e;">a</span> = { <span style="color: #fcaf3e;">x</span> = 1; <span style="color: #fcaf3e;">y</span> = <span style="color: #e9b96e;">"foo"</span>; <span style="color: #fcaf3e;">z</span> = <span style="color: #e9b2e3; font-weight: bold;">https://lots.of/pipes</span>; };
 </pre>
 </div></li>
 <li><p>
@@ -109,9 +110,9 @@ standard set operation: //
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">      &gt; b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
+<pre  class="src src-nix">      &gt; <span style="color: #fcaf3e;">b</span> = { <span style="color: #fcaf3e;">x</span> = 3; <span style="color: #fcaf3e;">r</span> = [2 <span style="color: #e9b96e;">"hi"</span>]; <span style="color: #fcaf3e;">blob</span> = { <span style="color: #fcaf3e;">t</span>=1; }; };
       &gt; a // b
-      { r = [...]; x = 3; y = "foo"; z = ... }
+      { <span style="color: #fcaf3e;">r</span> = [...]; <span style="color: #fcaf3e;">x</span> = 3; <span style="color: #fcaf3e;">y</span> = <span style="color: #e9b96e;">"foo"</span>; <span style="color: #fcaf3e;">z</span> = ... }
 </pre>
 </div></li>
 <li><p>
@@ -129,8 +130,8 @@ functions
 </section>
 </section>
 <section>
-<section id="slide-orga47859a">
-<h2 id="orga47859a">nix language files</h2>
+<section id="slide-org55e8072">
+<h2 id="org55e8072">nix language files</h2>
 <ul>
 <li><p>
 convention: file stores a function
@@ -164,84 +165,116 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-org2de4f0a">
-<h2 id="org2de4f0a">Roadmap</h2>
+<section id="slide-org1aeb546">
+<h2 id="org1aeb546">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
-<li class="fragment highlight-green">Evaluate language to determine goals</li>
-<li class="fragment highlight-green">Effect goals in IO</li>
-<li>Store results</li>
+<li class="fragment highlight-green">Evaluate language to determine goals: derivations</li>
+<li>Storing builds</li>
+<li>Realize Derivations (IO)</li>
 <li>Compose results into environments</li>
 
 </ol>
 </section>
 </section>
 <section>
-<section id="slide-org07728f1">
-<h2 id="org07728f1">nix effects (aka. IO)</h2>
+<section id="slide-org2c46880">
+<h2 id="org2c46880">Create Derivations</h2>
 <ul>
-<li>core set of builders (aka. "stdenv")
-<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh"><a href="https://github.com/NixOS/nixpkgs/blob/master">https://github.com/NixOS/nixpkgs/blob/master</a></a>
-<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh">/pkgs/stdenv/generic/setup.sh</a></li>
-<li>look for specific attributes and use them</li>
-<li>builders
+<li>What is a Derivation?
 <ul>
-<li>look for specific attributes</li>
-<li>can define stages</li>
-<li>invoke sub-builders</li>
+<li>instructions on how to build something + references to every dependency</li>
+<li>Implemented as sets, but treated specially during evaluation.
+<ul>
+<li>Perform side effects like producing build output</li>
+
+</ul></li>
+<li>derivation is the most important primitive in nix
+<ul>
+<li>Requires a name</li>
+<li>Requires a builder (script for building the package)
+<ul>
+<li>All attributes are passed as environment variables to the build.</li>
+
+</ul></li>
+<li>Requires a src
+<ul>
+<li>can use local source, or perform IO and fetch over network</li>
+
+</ul></li>
+
+</ul></li>
 
 </ul></li>
 
 </ul>
 </section>
-</section>
-<section>
-<section id="slide-orga2fefe1">
-<h2 id="orga2fefe1">build specification</h2>
+<section id="slide-org2e45d76">
+<h3 id="org2e45d76">Writing Derivations</h3>
 <ul>
+<li>In practice you'll use wrappers
+<ul>
+<li>e.g., runCommand, writeScriptBin, mkDerivation</li>
 <li><p>
-Determine build goal
+mkDerivation uses setup.sh by default
 </p>
-<pre class="example">
-    $ nix-env -iA nix.pkgs.git
-</pre></li>
-<li><p>
-Specifies the derivation to run the builder on
-</p>
-<div class="org-src-container">
+<p class="verse">
+<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh"><a href="https://github.com/ixOS/nixpkgs/blob/master">https://github.com/ixOS/nixpkgs/blob/master</a></a> <a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh">/pkgs/stdenv/generic/setup.sh</a><br />
+</p></li>
+<li>fetchUrl, fetchFromGitHub, fetchFromGitLab, etc.
+<ul>
+<li>fixed output derivations.</li>
+<li>Perform network IO, but "pure" because they perform "hash
+matching".</li>
 
-<pre  class="src src-nix">    nix = { ...
-        pkgs = { ...
-            git = mkDerivation { name="git"; src=...; ...}
-            ...
-        };
-    }
-</pre>
-</div></li>
-<li>Here "nix" is actually a "channel" name (described later)</li>
+</ul></li>
+
+</ul></li>
 
 </ul>
 </section>
+<section id="slide-org4ef4298">
+<h3 id="org4ef4298">Sample derivation</h3>
+<pre class="example">
+    { pkgs ? import &lt;nixpkgs&gt; {} }:
+
+      # pkgs parameter has a default; it lazily imports
+      # all of nixpkgs namespace into scope
+
+      pkgs.stdenv.mkDerivation {
+
+        name = "hello-2.9";
+
+        # src itself is a derivation
+        # All derivations are stored in the /nix/store, before being realized
+        src = pkgs.fetchurl {
+          url = "mirror://gnu/hello/${name}.tar.gz";
+          sha256 = "19qy37gkasc4csb1d3bdiz9snn8mir2p3aj0jgzmfv0r2hi7mfzc";
+        };
+
+      };
+    }
+</pre>
+</section>
 </section>
 <section>
-<section id="slide-org953c7e2">
-<h2 id="org953c7e2">Roadmap</h2>
+<section id="slide-orgb1d683f">
+<h2 id="orgb1d683f">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
-<li>Evaluate language to determine goals</li>
-<li>Effect goals in IO</li>
-<li class="fragment highlight-green">Store results</li>
+<li>Evaluate language to determine goals: derivations</li>
+<li class="fragment highlight-green">Storing builds</li>
+<li>Realize Derivations (IO)</li>
 <li>Compose results into environments</li>
 
 </ol>
 </section>
 </section>
 <section>
-<section id="slide-org65e0269">
-<h2 id="org65e0269">nix-env command</h2>
+<section id="slide-org75fb29f">
+<h2 id="org75fb29f">nix store</h2>
 <ul>
-<li>Input is which derivation to run builders on</li>
-<li>nix-env puts build output into the "store"
+<li>Building a derivation puts build output into the "store"
 <ul>
 <li>System global directory tree</li>
 
@@ -253,28 +286,22 @@ Specifies the derivation to run the builder on
 <li>nix-env recursively builds dependencies</li>
 
 </ul></li>
+
+</ul>
+</section>
+<section id="slide-orgcff59a0">
+<h3 id="orgcff59a0">Unique hashes</h3>
+<ul>
 <li><p>
 each store entry identified by hash
 </p>
 <pre class="example">
-      $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
-        bin/ etc/ lib/ libexec/ share/
+$ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
+bin/ etc/ lib/ libexec/ share/
 </pre></li>
-
-</ul>
-</section>
-<section id="slide-org57b5d26">
-<h3 id="org57b5d26">Unique hashes</h3>
-<ul>
 <li>every package and every version has unique hash
 <ul>
-<li><p>
-closure over build-time inputs
-</p>
-<pre class="example">
-      $ ls /nix/store/&lt;TAB&gt;
-      Display all 7644 possibilities? (y or n)
-</pre></li>
+<li>closure over build-time inputs</li>
 
 </ul></li>
 <li>can have multiple versions
@@ -286,40 +313,91 @@ closure over build-time inputs
 
 </ul>
 </section>
-<section id="slide-orgfd92fea">
-<h3 id="orgfd92fea">Sample specification</h3>
-<div class="org-src-container">
+</section>
+<section>
+<section id="slide-org698bda3">
+<h2 id="org698bda3">Roadmap</h2>
+<ol>
+<li>Define a pure language</li>
+<li>Evaluate language to determine goals: derivations</li>
+<li>Storing builds</li>
+<li class="fragment highlight-green">Realize Derivations (IO)</li>
+<li>Compose results into environments</li>
 
-<pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
-, libjpeg, readline, libtool
-}:
-
-stdenv.mkDerivation rec {
-  name = "gphoto2-2.5.11";
-
-  src = fetchurl {
-    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
-    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
-  };
-
-  nativeBuildInputs = [ pkgconfig gettext libtool ];
-  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
-
-  meta = with stdenv.lib; {
-    description = "A ready to use set of digital camera software applications";
-    homepage = http://www.gphoto.org/;
-    license = licenses.gpl2Plus;
-    platforms = platforms.unix;
-    maintainers = [ maintainers.jcumming ];
-  };
-}
-</pre>
-</div>
+</ol>
 </section>
 </section>
 <section>
-<section id="slide-orgc576b57">
-<h2 id="orgc576b57">Roadmap</h2>
+<section id="slide-org441f77c">
+<h2 id="org441f77c">Realize derivations</h2>
+<ul>
+<li>Phase distinction, instantiation &amp; realization</li>
+<li>nix (<a href="https://github.com/nixos/nix">https://github.com/nixos/nix</a>)
+<ul>
+<li>Heart of nix system, 4 C++ libraries, dozen or so utilities</li>
+
+</ul></li>
+<li>nix-instantiate
+<ul>
+<li><p>
+Creates build instructions, calculates hash
+</p>
+<p class="verse">
+<a href="https://gist.github.com/dmjio/7e5a024f95fe18aa34f8fea69ecebc74#file-derivation-txt-L2">https://gist.github.com/dmjio/7e5a024f95fe18aa34f8fea69ecebc74#file-derivation-txt-L2</a><br />
+<a href="https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104">https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104</a><br />
+</p></li>
+<li>Will exploit network binary caches of store path</li>
+
+</ul></li>
+<li>nix-store -r
+<ul>
+<li>Build ("realize") package from derivation description</li>
+<li>Can watch evaluation through setup.sh by tracing "set -x"</li>
+
+</ul></li>
+<li>nix-build
+<ul>
+<li>Creates derivation, builds package, installs in store</li>
+<li>Equivalent to calling 'nix-store -r $(nix-instantiate default.nix)'</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org4f3467a">
+<h3 id="org4f3467a">Build phases</h3>
+<ul>
+<li>Builds go through phases
+<ul>
+<li>pre/postFetch, pre/postBuild, pre/postInstall. etc/</li>
+<li>Package builds are split into phases to make it easier to
+override specific parts of the build (e.g., unpacking the
+sources or installing the binaries).</li>
+<li>New phases can be defined (haskell packages does this,
+e.g. haddockPhase)</li>
+<li>Default phase behavior can be seen in setup.sh</li>
+
+</ul></li>
+<li><p>
+nix-shell
+</p>
+<pre class="example">
+    $ nix-shell $(nix-instantiate default.nix)
+</pre>
+<ul>
+<li>Useful for interactively building derivations</li>
+<li>Puts a user into a shell with environment variables from the
+derivation present</li>
+<li>Can run the build with `genericBuild`</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org838a0e8">
+<h2 id="org838a0e8">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals</li>
@@ -331,8 +409,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-org4ab1713">
-<h2 id="org4ab1713">profiles expose packages</h2>
+<section id="slide-orgf64ae8e">
+<h2 id="orgf64ae8e">profiles expose packages</h2>
 <ul>
 <li>Each exe or lib has a unique store location</li>
 <li>Want a useable environment to run multiple tools</li>
@@ -343,8 +421,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-orgd75af75">
-<h2 id="orgd75af75">Minimizing for Effectiveness</h2>
+<section id="slide-org2156979">
+<h2 id="org2156979">Minimizing for Effectiveness</h2>
 <ul>
 <li>Conventional package managers install globally</li>
 <li>This is an anti-pattern using nix</li>
@@ -373,8 +451,8 @@ package</li>
 </section>
 </section>
 <section>
-<section id="slide-orgbb7946d">
-<h2 id="orgbb7946d">nix pkgs</h2>
+<section id="slide-org2ef3111">
+<h2 id="org2ef3111">nixpkgs</h2>
 <ul>
 <li>A large set of ready-made derivations</li>
 <li>Each function is (ultimately) the mkDerivation</li>
@@ -400,8 +478,8 @@ Updates of packages
 
 </ul>
 </section>
-<section id="slide-orgace83d6">
-<h3 id="orgace83d6">Huge collection of files</h3>
+<section id="slide-orge980482">
+<h3 id="orge980482">Huge collection of files</h3>
 <ul>
 <li><a href="https://github.com/nixos/nixpkgs">https://github.com/nixos/nixpkgs</a></li>
 <li>Jul 29, 2017:
@@ -416,8 +494,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org18a5476">
-<h2 id="org18a5476">NixOS</h2>
+<section id="slide-orgcb6966e">
+<h2 id="orgcb6966e">NixOS</h2>
 <ul>
 <li>Built on nix language</li>
 <li>Adds "system" profile, containing kernel, boot image</li>
@@ -435,8 +513,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-orgb7d74b7">
-<h2 id="orgb7d74b7">Language ecosystems</h2>
+<section id="slide-orgf421ac0">
+<h2 id="orgf421ac0">Language ecosystems</h2>
 <ul>
 <li>Each language has its own "package" concept</li>
 <li>Nix has tools/language elements to support different languages</li>
@@ -446,16 +524,20 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-orge767f21">
-<h2 id="orge767f21">cabal2nix</h2>
+<section id="slide-org496fccc">
+<h2 id="org496fccc">cabal2nix</h2>
 <ul>
 <li>Tool to builds a nix specification from a cabal file</li>
 <li>hydra builds
 <ul>
 <li>cabal2nix run on LTS yaml file</li>
 <li>Generates new packages specification</li>
-<li>pkgs.haskellPackages.PKG  (11,257 pkgs)
-<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix">https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix</a></li>
+<li><p>
+pkgs.haskellPackages.PKG  (11,257 pkgs)
+</p>
+<p class="verse">
+<a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix">https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix</a><br />
+</p></li>
 <li>hydra rebuilds from new package descriptions</li>
 <li>For new packages or newer versions
 <ul>
@@ -464,20 +546,20 @@ Updates of packages
 </ul></li>
 
 </ul></li>
-<li>Input sources:
-<ul>
-<li>local directory path</li>
-<li>hackage via cabal://pkgname[-version]</li>
-<li>web via http  (e.g. github)  (optional revision)</li>
-
-</ul></li>
+<li>Input sources:</li>
 
 </ul>
+<pre class="example">
+$ cabal2nix /home/kquick/crucible/crucible-matlab &gt; crucible-matlab.nix
+$ cabal2nix cabal://language-sally &gt; language-sally.nix
+$ cabal2nix cabal://containers-4.3.1 &gt; containers-4.3.1.nix
+$ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] &gt; crucible.nix
+</pre>
 </section>
 </section>
 <section>
-<section id="slide-org40e2c78">
-<h2 id="org40e2c78">INSTALLING a local haskell project</h2>
+<section id="slide-org3878135">
+<h2 id="org3878135">INSTALLING a local haskell project</h2>
 <ul>
 <li><p>
 high-level config specifying new/missing components
@@ -497,8 +579,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-org38cb6d5">
-<h2 id="org38cb6d5">DEVELOPING a local haskell project</h2>
+<section id="slide-orge185295">
+<h2 id="orge185295">DEVELOPING a local haskell project</h2>
 <ul>
 <li>nix-shell</li>
 <li>instantiates the build environment
@@ -517,8 +599,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-org7c33136">
-<h2 id="org7c33136">crucible/tanager</h2>
+<section id="slide-orgb64cead">
+<h2 id="orgb64cead">crucible/tanager</h2>
 <ul>
 <li>top level package config</li>
 <li>bash script to run cabal2nix for localdirs or (if not present),
@@ -531,10 +613,41 @@ github or hackage.</li>
 
 </ul>
 </section>
+<section id="slide-orgcc49c8d">
+<h3 id="orgcc49c8d">Sample specification</h3>
+<div class="org-src-container">
+
+<pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
+, libjpeg, readline, libtool
+}:
+
+stdenv.mkDerivation <span style="color: #b4fa70;">rec</span> {
+  <span style="color: #fcaf3e;">name</span> = <span style="color: #e9b96e;">"gphoto2-2.5.11"</span>;
+
+  <span style="color: #fcaf3e;">src</span> = fetchurl {
+    <span style="color: #fcaf3e;">url</span> = <span style="color: #e9b96e;">"mirror://sourceforge/gphoto/${name}.tar.bz2"</span>;
+    <span style="color: #fcaf3e;">sha256</span> = <span style="color: #e9b96e;">"1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r"</span>;
+  };
+
+  <span style="color: #fcaf3e;">nativeBuildInputs</span> = [ pkgconfig gettext libtool ];
+  <span style="color: #fcaf3e;">buildInputs</span> = [ libgphoto2 libexif popt libjpeg readline ];
+
+  <span style="color: #fcaf3e;">meta</span> = <span style="color: #b4fa70;">with</span> stdenv.lib; {
+    <span style="color: #fcaf3e;">description</span> = <span style="color: #e9b96e;">"A ready to use set of digital camera software applications"</span>;
+    <span style="color: #fcaf3e;">homepage</span> = <span style="color: #e9b2e3; font-weight: bold;">http://www.gphoto.org/</span>;
+    <span style="color: #fcaf3e;">license</span> = licenses.gpl2Plus;
+    <span style="color: #fcaf3e;">platforms</span> = platforms.unix;
+    <span style="color: #fcaf3e;">maintainers</span> = [ maintainers.jcumming ];
+  };
+}
+</pre>
+</div>
+
+</section>
 </section>
 <section>
-<section id="slide-org2a252b0">
-<h2 id="org2a252b0">REPL</h2>
+<section id="slide-orgfb79343">
+<h2 id="orgfb79343">REPL</h2>
 <ul>
 <li><p>
 REPL tool for language and inspection
@@ -552,8 +665,8 @@ REPL tool for language and inspection
 </section>
 </section>
 <section>
-<section id="slide-orgf647f79">
-<h2 id="orgf647f79">Miscellaneous</h2>
+<section id="slide-orgf412d4d">
+<h2 id="orgf412d4d">Miscellaneous</h2>
 <ul>
 <li>Local builds are not incremental</li>
 <li>Attributes are specific but not versioned
@@ -584,8 +697,40 @@ Store can get big (that's called efficiency)
 </section>
 </section>
 <section>
-<section id="slide-org2ebcb2c">
-<h2 id="org2ebcb2c">THE END</h2>
+<section id="slide-org10e43bc">
+<h2 id="org10e43bc">Examples</h2>
+<ul>
+<li>CyberChaff
+<ul>
+<li>Build
+<ul>
+<li><a href="https://gist.github.com/e6ad693c41b49b925557fd52aaaf6a42">https://gist.github.com/e6ad693c41b49b925557fd52aaaf6a42</a></li>
+
+</ul></li>
+
+</ul></li>
+<li>DDOS-gui (<a href="http://ddos.dmj.io">http://ddos.dmj.io</a>)
+<ul>
+<li>Build
+<ul>
+<li><a href="https://gist.github.com/dmjio/3a1d977fe9e537ca2ad6efcd3a708d4b">https://gist.github.com/dmjio/3a1d977fe9e537ca2ad6efcd3a708d4b</a></li>
+
+</ul></li>
+<li>NixOS module, deployment
+<ul>
+<li><a href="https://gist.github.com/dmjio/7c0cb81113c7c46cf35edceb5c7960ac">https://gist.github.com/dmjio/7c0cb81113c7c46cf35edceb5c7960ac</a></li>
+<li><a href="https://gist.github.com/dmjio/7705f8c112506f8e93ee09271ccdd14e">https://gist.github.com/dmjio/7705f8c112506f8e93ee09271ccdd14e</a></li>
+
+</ul></li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org89ef30a">
+<h2 id="org89ef30a">THE END</h2>
 <ul>
 <li>Nix language
 <ul>
