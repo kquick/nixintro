@@ -1,4 +1,11 @@
 #+REVEAL_THEME: night
+#+REVEAL_EXTRA_CSS: ./nixtalk.css
+#+REVEAL_MULTIPLEX_ID: thething
+#+REVEAL_MULTIPLEX_SECRET: sekrit
+#+REVEAL_MULTIPLEX_URL: http://kwq.today
+#+REVEAL_MULTIPLEX_SOCKETIO_URL: http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.10/socket.io.min.js
+#+REVEAL_MULTIPLEX_PLUGINS: (multiplex)
+
 #+OPTIONS: toc:nil num:nil
 #+TITLE: Nix Introduction
 #+AUTHOR: Kevin Quick & David Johnson
@@ -27,9 +34,9 @@
 * Roadmap
   #+ATTR_REVEAL: :frag (highlight-green none none none none)
     1. Define a pure language
-    2. Evaluate language to determine goals
-    3. Effect goals in IO
-    4. Store results
+    2. Evaluate language to determine goals: derivations
+    3. Storing builds
+    4. Realize derivations (IO)
     5. Compose results into environments
 * nix language
   https://nixos.org/nix/manual
@@ -74,43 +81,62 @@
       true
     #+END_EXAMPLE
 * Roadmap
-#+ATTR_REVEAL: :frag (none highlight-green highlight-green none none)
+#+ATTR_REVEAL: :frag (none highlight-green none none none)
     1. Define a pure language
-    2. Create Derivations
-    3. Realize Derivations
-    4. Store results
+    2. Evaluate language to determine goals: derivations
+    3. Storing builds
+    4. Realize Derivations (IO)
     5. Compose results into environments
 * Create Derivations
   * What is a Derivation?
-    * A derivation is the instructions on how to build something, and references to every dependency it has.
-    * Derivations are implemented as sets, but treated specially during evaluation.
+    * instructions on how to build something + references to every dependency
+    * Implemented as sets, but treated specially during evaluation.
       - Perform side effects like producing build output
     * derivation is the most important primitive in nix
       - Requires a name
       - Requires a builder (script for building the package)
-	 - All attributes are passed as environment variables to the build.
-      - Requires a src (can use local source, or perform IO and fetch over network)
-    * In practice you'll use wrappers (i.e. runCommand, writeScriptBin, mkDerivation).
+	     - All attributes are passed as environment variables to the build.
+      - Requires a src
+        - can use local source, or perform IO and fetch over network
+** Writing Derivations
+    * In practice you'll use wrappers
+      * e.g., runCommand, writeScriptBin, mkDerivation
       * mkDerivation uses setup.sh by default
-	- [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/ixOS/nixpkgs/blob/master]][[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
-    * fetchUrl, fetchFromGitHub, fetchFromGitLab, etc. are fixed output derivations.
-      - Perform network IO, but "pure" because they perform "hash matching".
-  * Sample derivation
+        #+BEGIN_VERSE
+	      [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/ixOS/nixpkgs/blob/master]] [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
+        #+END_VERSE
+      * fetchUrl, fetchFromGitHub, fetchFromGitLab, etc.
+        - fixed output derivations.
+        - Perform network IO, but "pure" because they perform "hash
+          matching".
+** Sample derivation
     #+BEGIN_EXAMPLE
-    # default parameter, lazily imports all of nixpkgs namespace into scope
     { pkgs ? import <nixpkgs> {} }:
-      # stdenv is passed in automatically
+
+      # pkgs parameter has a default; it lazily imports
+      # all of nixpkgs namespace into scope
+
       pkgs.stdenv.mkDerivation {
-        # name
-	name = "hello-2.9";
+
+        name = "hello-2.9";
+
         # src itself is a derivation
         # All derivations are stored in the /nix/store, before being realized
-	src = pkgs.fetchurl {
-	  url = "mirror://gnu/hello/${name}.tar.gz";
-	  sha256 = "19qy37gkasc4csb1d3bdiz9snn8mir2p3aj0jgzmfv0r2hi7mfzc";
-	};
+        src = pkgs.fetchurl {
+          url = "mirror://gnu/hello/${name}.tar.gz";
+          sha256 = "19qy37gkasc4csb1d3bdiz9snn8mir2p3aj0jgzmfv0r2hi7mfzc";
+        };
+
+      };
     }
     #+END_EXAMPLE
+* Roadmap
+#+ATTR_REVEAL: :frag (none none highlight-green none none)
+    1. Define a pure language
+    2. Evaluate language to determine goals: derivations
+    3. Storing builds
+    4. Realize Derivations (IO)
+    5. Compose results into environments
 * nix store
   * Building a derivation puts build output into the "store"
     - System global directory tree
@@ -121,45 +147,55 @@
 ** Unique hashes
   * each store entry identified by hash
     #+BEGIN_EXAMPLE
-      $ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
-	bin/ etc/ lib/ libexec/ share/
+$ ls -CF /nix/store/q0crs4bg5vgl9cjpp9yxysd1w97inr0-git-2.13.2/
+bin/ etc/ lib/ libexec/ share/
     #+END_EXAMPLE
   * every package and every version has unique hash
     * closure over build-time inputs
   * can have multiple versions
     * each store location is isolated
     * all dependencies are _explicit_ in the derivation
+* Roadmap
+  #+ATTR_REVEAL: :frag (none none none highlight-green none)
+    1. Define a pure language
+    2. Evaluate language to determine goals: derivations
+    3. Storing builds
+    4. Realize Derivations (IO)
+    5. Compose results into environments
 * Realize derivations
   * Phase distinction, instantiation & realization
   * nix (https://github.com/nixos/nix)
     - Heart of nix system, 4 C++ libraries, dozen or so utilities
   * nix-instantiate
     - Creates build instructions, calculates hash
-      - https://gist.github.com/dmjio/7e5a024f95fe18aa34f8fea69ecebc74#file-derivation-txt-L2
-      - https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104
-      - Will exploit binary cache if store path exists on networked machines
+      #+BEGIN_VERSE 
+https://gist.github.com/dmjio/7e5a024f95fe18aa34f8fea69ecebc74#file-derivation-txt-L2
+https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104
+      #+END_VERSE
+    - Will exploit network binary caches of store path
   * nix-store -r
-    - Attempts to build ("realize") package from derivation description
+    - Build ("realize") package from derivation description
     - Can watch evaluation through setup.sh by tracing "set -x"
   * nix-build
-    - Equivalent to calling 'nix-store -r $(nix-instantiate default.nix)'
     - Creates derivation, builds package, installs in store
+    - Equivalent to calling 'nix-store -r $(nix-instantiate default.nix)'
+** Build phases
   * Builds go through phases
     - pre/postFetch, pre/postBuild, pre/postInstall. etc/
-    - Package builds are split into phases to make it easier to override specific parts of the build (e.g., unpacking the sources or installing the binaries).
-    - New phases can be defined (haskell packages does this, i.e. haddockPhase)
+    - Package builds are split into phases to make it easier to
+      override specific parts of the build (e.g., unpacking the
+      sources or installing the binaries).
+    - New phases can be defined (haskell packages does this,
+      e.g. haddockPhase)
     - Default phase behavior can be seen in setup.sh
-  * nix-shell $(nix-instantiate default.nix)
+  * nix-shell
+    #+BEGIN_EXAMPLE
+    $ nix-shell $(nix-instantiate default.nix)
+    #+END_EXAMPLE
     - Useful for interactively building derivations
-    - Puts a user into a shell with environment variables from the derivation present
+    - Puts a user into a shell with environment variables from the
+      derivation present
     - Can run the build with `genericBuild`
-* Roadmap
-  #+ATTR_REVEAL: :frag (none none none highlight-green none)
-    1. Define a pure language
-    2. Evaluate language to determine goals
-    3. Effect goals in IO
-    4. Store results
-    5. Compose results into environments
 * Roadmap
 #+ATTR_REVEAL: :frag (none none none none highlight-green)
     1. Define a pure language
@@ -222,14 +258,19 @@
     * cabal2nix run on LTS yaml file
     * Generates new packages specification
     * pkgs.haskellPackages.PKG  (11,257 pkgs)
-      https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix
+      #+BEGIN_VERSE
+https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/haskell-packages/hackage-packages.nix
+      #+END_VERSE
     * hydra rebuilds from new package descriptions
     * For new packages or newer versions
       - use cabal2nix to generate a local file
   * Input sources:
-     * local directory path
-     * hackage via cabal://pkgname[-version]
-     * web via http  (e.g. github)  (optional revision)
+#+BEGIN_EXAMPLE
+$ cabal2nix /home/kquick/crucible/crucible-matlab > crucible-matlab.nix
+$ cabal2nix cabal://language-sally > language-sally.nix
+$ cabal2nix cabal://containers-4.3.1 > containers-4.3.1.nix
+$ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] > crucible.nix
+#+END_EXAMPLE
 * INSTALLING a local haskell project
   * high-level config specifying new/missing components
     #+BEGIN_EXAMPLE
