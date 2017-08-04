@@ -17,7 +17,7 @@
     - nix-env high level: calls the other tools.
     - nix-shell, nix-store, nix-build
   * nix language
-    - declarative static expressions
+    - declarative
     - dynamic typing
       - resolved at runtime
       - no implicit coersion
@@ -55,7 +55,7 @@
 * nix language files
   * convention: file stores a function
     #+BEGIN_EXAMPLE
-      $ cat > myfun.nix
+      $ cat myfun.nix
       { i, j }:
       i + j.x
     #+END_EXAMPLE
@@ -97,7 +97,7 @@
       * e.g., runCommand, writeScriptBin, mkDerivation
       * mkDerivation uses setup.sh by default
         #+BEGIN_VERSE
-	      [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][https://github.com/ixOS/nixpkgs/blob/master]] [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][/pkgs/stdenv/generic/setup.sh]]
+https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh
         #+END_VERSE
       * fetchUrl, fetchFromGitHub, fetchFromGitLab, etc.
         - fixed output derivations.
@@ -137,7 +137,6 @@
   * Nothing is in scope
     - dependencies passed in to derivation as args
     - args reference store locations
-    - nix-env recursively builds dependencies
 ** Unique hashes
   * each store entry identified by hash
     #+BEGIN_EXAMPLE
@@ -193,9 +192,9 @@ https://github.com/NixOS/nix/blob/master/src/libstore/store-api.cc#L104
 * Roadmap
 #+ATTR_REVEAL: :frag (none none none none highlight-green)
     1. Define a pure language
-    2. Evaluate language to determine goals
-    3. Effect goals in IO
-    4. Store results
+    2. Evaluate language to determine goals: derivations
+    3. Storing builds
+    3. Realize derivations (IO)
     5. Compose results into environments
 * profiles expose packages
   * Each exe or lib has a unique store location
@@ -276,6 +275,7 @@ $ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] > crucible.nix
     * maintains closure chain/reproducability
 * DEVELOPING a local haskell project
   * nix-shell
+  * high-level config specifying new/missing components
   * instantiates the build environment
     (i.e. builds all dependencies)
   * does not build current target
@@ -289,10 +289,11 @@ $ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] > crucible.nix
   * bash script to run cabal2nix for localdirs or (if not present),
     github or hackage.
   * https://github.com/kquick/crucible_nix
-  * Use Gabriel Gonzalez's excellent description:
-    https://github.com/Gabriel439/haskell-nix
-  * Also John Wiegley's work:
-    https://github.com/jwiegley/nix-config
+  * Recommended
+    - Use Gabriel Gonzalez's excellent description:
+      https://github.com/Gabriel439/haskell-nix
+    - Also John Wiegley's work:
+      https://github.com/jwiegley/nix-config
 ** Sample specification
   #+BEGIN_SRC nix
 { stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
