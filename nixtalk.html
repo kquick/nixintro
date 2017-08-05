@@ -27,11 +27,11 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">Kevin Quick &amp; David Johnson</h2><p class="date">Created: 2017-08-04 Fri 10:43</p>
+<section id="sec-title-slide"><h1 class="title">Nix Introduction</h1><h2 class="author">Kevin Quick &amp; David Johnson</h2><p class="date">Created: 2017-08-05 Sat 16:00</p>
 </section>
 <section>
-<section id="slide-orgc4baa9f">
-<h2 id="orgc4baa9f">Sales Pitch</h2>
+<section id="slide-orgdc05ff2">
+<h2 id="orgdc05ff2">Sales Pitch</h2>
 <ul>
 <li>Why use nix to install packages?</li>
 <li>Reproducible builds</li>
@@ -45,8 +45,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgf0881a2">
-<h2 id="orgf0881a2">nix is a package manager</h2>
+<section id="slide-orgbb18992">
+<h2 id="orgbb18992">nix is a package manager</h2>
 <ul>
 <li>(&#x2026; and a language, and an OS)</li>
 <li>nix is a package manager
@@ -78,8 +78,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orga80f610">
-<h2 id="orga80f610">Roadmap</h2>
+<section id="slide-org8c5a94c">
+<h2 id="org8c5a94c">Roadmap</h2>
 <ol>
 <li class="fragment highlight-green">Define a pure language</li>
 <li>Evaluate language to determine goals: derivations</li>
@@ -91,8 +91,8 @@
 </section>
 </section>
 <section>
-<section id="slide-org606912c">
-<h2 id="org606912c">nix language</h2>
+<section id="slide-org2268b68">
+<h2 id="org2268b68">nix language</h2>
 <p>
 <a href="https://nixos.org/nix/manual">https://nixos.org/nix/manual</a>
 </p>
@@ -102,7 +102,7 @@ sets of attr/val
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">      &gt; a = { x = 1; y = "foo"; z = https://lots.of/pipes; };
+<pre  class="src src-nix">      &gt; <span style="color: #fcaf3e;">a</span> = { <span style="color: #fcaf3e;">x</span> = 1; <span style="color: #fcaf3e;">y</span> = <span style="color: #e9b96e;">"foo"</span>; <span style="color: #fcaf3e;">z</span> = <span style="color: #e9b2e3; font-weight: bold;">https://lots.of/pipes</span>; };
 </pre>
 </div></li>
 <li><p>
@@ -110,9 +110,9 @@ standard set operation: //
 </p>
 <div class="org-src-container">
 
-<pre  class="src src-nix">      &gt; b = { x = 3; r = [2 "hi"]; blob = { t=1; }; };
+<pre  class="src src-nix">      &gt; <span style="color: #fcaf3e;">b</span> = { <span style="color: #fcaf3e;">x</span> = 3; <span style="color: #fcaf3e;">r</span> = [2 <span style="color: #e9b96e;">"hi"</span>]; <span style="color: #fcaf3e;">blob</span> = { <span style="color: #fcaf3e;">t</span>=1; }; };
       &gt; a // b
-      { r = [...]; x = 3; y = "foo"; z = ... }
+      { <span style="color: #fcaf3e;">r</span> = [...]; <span style="color: #fcaf3e;">x</span> = 3; <span style="color: #fcaf3e;">y</span> = <span style="color: #e9b96e;">"foo"</span>; <span style="color: #fcaf3e;">z</span> = ... }
 </pre>
 </div></li>
 <li><p>
@@ -130,8 +130,8 @@ functions
 </section>
 </section>
 <section>
-<section id="slide-orgc608300">
-<h2 id="orgc608300">nix language files</h2>
+<section id="slide-orgaafb159">
+<h2 id="orgaafb159">nix language files</h2>
 <ul>
 <li><p>
 convention: file stores a function
@@ -165,8 +165,8 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-org81aff94">
-<h2 id="org81aff94">Roadmap</h2>
+<section id="slide-org7883cd5">
+<h2 id="org7883cd5">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li class="fragment highlight-green">Evaluate language to determine goals: derivations</li>
@@ -178,8 +178,8 @@ conventionally one argument: a set of values
 </section>
 </section>
 <section>
-<section id="slide-org2366e16">
-<h2 id="org2366e16">Create Derivations</h2>
+<section id="slide-orga858560">
+<h2 id="orga858560">Create Derivations</h2>
 <ul>
 <li>What is a Derivation?
 <ul>
@@ -209,8 +209,8 @@ conventionally one argument: a set of values
 
 </ul>
 </section>
-<section id="slide-org4d59477">
-<h3 id="org4d59477">Writing Derivations</h3>
+<section id="slide-org00368a0">
+<h3 id="org00368a0">Writing Derivations</h3>
 <ul>
 <li>In practice you'll use wrappers
 <ul>
@@ -233,8 +233,8 @@ matching".</li>
 
 </ul>
 </section>
-<section id="slide-org07dc48b">
-<h3 id="org07dc48b">Sample derivation</h3>
+<section id="slide-org7b63d6c">
+<h3 id="org7b63d6c">Sample derivation</h3>
 <pre class="example">
     { pkgs ? import &lt;nixpkgs&gt; {} }:
 
@@ -258,8 +258,8 @@ matching".</li>
 </section>
 </section>
 <section>
-<section id="slide-orgea59d57">
-<h2 id="orgea59d57">Roadmap</h2>
+<section id="slide-org93e797a">
+<h2 id="org93e797a">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals: derivations</li>
@@ -271,8 +271,8 @@ matching".</li>
 </section>
 </section>
 <section>
-<section id="slide-org7bd3584">
-<h2 id="org7bd3584">nix store</h2>
+<section id="slide-org5113097">
+<h2 id="org5113097">nix store</h2>
 <ul>
 <li>Building a derivation puts build output into the "store"
 <ul>
@@ -288,8 +288,8 @@ matching".</li>
 
 </ul>
 </section>
-<section id="slide-org2778658">
-<h3 id="org2778658">Unique hashes</h3>
+<section id="slide-org3ff0d94">
+<h3 id="org3ff0d94">Unique hashes</h3>
 <ul>
 <li><p>
 each store entry identified by hash
@@ -314,8 +314,8 @@ bin/ etc/ lib/ libexec/ share/
 </section>
 </section>
 <section>
-<section id="slide-org353cf59">
-<h2 id="org353cf59">Roadmap</h2>
+<section id="slide-org792b442">
+<h2 id="org792b442">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals: derivations</li>
@@ -327,8 +327,8 @@ bin/ etc/ lib/ libexec/ share/
 </section>
 </section>
 <section>
-<section id="slide-org9e6b978">
-<h2 id="org9e6b978">Realize derivations</h2>
+<section id="slide-org8f93bf4">
+<h2 id="org8f93bf4">Realize derivations</h2>
 <ul>
 <li>Phase distinction, instantiation &amp; realization</li>
 <li>nix (<a href="https://github.com/nixos/nix">https://github.com/nixos/nix</a>)
@@ -363,8 +363,8 @@ Creates build instructions, calculates hash
 
 </ul>
 </section>
-<section id="slide-org2a01475">
-<h3 id="org2a01475">Build phases</h3>
+<section id="slide-org138f8b7">
+<h3 id="org138f8b7">Build phases</h3>
 <ul>
 <li>Builds go through phases
 <ul>
@@ -395,8 +395,8 @@ derivation present</li>
 </section>
 </section>
 <section>
-<section id="slide-org3f9e762">
-<h2 id="org3f9e762">Roadmap</h2>
+<section id="slide-orgf9f8952">
+<h2 id="orgf9f8952">Roadmap</h2>
 <ol>
 <li>Define a pure language</li>
 <li>Evaluate language to determine goals: derivations</li>
@@ -408,8 +408,8 @@ derivation present</li>
 </section>
 </section>
 <section>
-<section id="slide-org4d641e8">
-<h2 id="org4d641e8">profiles expose packages</h2>
+<section id="slide-orga717c8d">
+<h2 id="orga717c8d">profiles expose packages</h2>
 <ul>
 <li>Each exe or lib has a unique store location</li>
 <li>Want a useable environment to run multiple tools</li>
@@ -420,8 +420,8 @@ derivation present</li>
 </section>
 </section>
 <section>
-<section id="slide-org61e7d4b">
-<h2 id="org61e7d4b">Minimizing for Effectiveness</h2>
+<section id="slide-org3e178fb">
+<h2 id="org3e178fb">Minimizing for Effectiveness</h2>
 <ul>
 <li>Conventional package managers install globally</li>
 <li>This is an anti-pattern using nix</li>
@@ -450,8 +450,8 @@ package</li>
 </section>
 </section>
 <section>
-<section id="slide-orgdfb586d">
-<h2 id="orgdfb586d">nixpkgs</h2>
+<section id="slide-orgb55f657">
+<h2 id="orgb55f657">nixpkgs</h2>
 <ul>
 <li>A large set of ready-made derivations</li>
 <li>Each function is (ultimately) the mkDerivation</li>
@@ -477,8 +477,8 @@ Updates of packages
 
 </ul>
 </section>
-<section id="slide-org66b1f4a">
-<h3 id="org66b1f4a">Huge collection of files</h3>
+<section id="slide-org73cbda6">
+<h3 id="org73cbda6">Huge collection of files</h3>
 <ul>
 <li><a href="https://github.com/nixos/nixpkgs">https://github.com/nixos/nixpkgs</a></li>
 <li>Jul 29, 2017:
@@ -493,8 +493,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-orgac75357">
-<h2 id="orgac75357">NixOS</h2>
+<section id="slide-orgd97c3d4">
+<h2 id="orgd97c3d4">NixOS</h2>
 <ul>
 <li>Built on nix language</li>
 <li>Adds "system" profile, containing kernel, boot image</li>
@@ -512,8 +512,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-org13017dc">
-<h2 id="org13017dc">Language ecosystems</h2>
+<section id="slide-org427a9c0">
+<h2 id="org427a9c0">Language ecosystems</h2>
 <ul>
 <li>Each language has its own "package" concept</li>
 <li>Nix has tools/language elements to support different languages</li>
@@ -523,8 +523,8 @@ Updates of packages
 </section>
 </section>
 <section>
-<section id="slide-orgd9a56ac">
-<h2 id="orgd9a56ac">cabal2nix</h2>
+<section id="slide-org5e3aa41">
+<h2 id="org5e3aa41">cabal2nix</h2>
 <ul>
 <li>Tool to builds a nix specification from a cabal file</li>
 <li>hydra builds
@@ -557,8 +557,8 @@ $ cabal2nix https://github.com/GaloisInc/crucible [-rev 98ac3d5] &gt; crucible.n
 </section>
 </section>
 <section>
-<section id="slide-org45f0ac0">
-<h2 id="org45f0ac0">INSTALLING a local haskell project</h2>
+<section id="slide-org80ec166">
+<h2 id="org80ec166">INSTALLING a local haskell project</h2>
 <ul>
 <li><p>
 high-level config specifying new/missing components
@@ -578,8 +578,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-orgea190e3">
-<h2 id="orgea190e3">DEVELOPING a local haskell project</h2>
+<section id="slide-org1b8bd57">
+<h2 id="org1b8bd57">DEVELOPING a local haskell project</h2>
 <ul>
 <li>nix-shell</li>
 <li>high-level config specifying new/missing components</li>
@@ -599,8 +599,8 @@ high-level config specifying new/missing components
 </section>
 </section>
 <section>
-<section id="slide-orga6396bd">
-<h2 id="orga6396bd">crucible</h2>
+<section id="slide-org9aa7083">
+<h2 id="org9aa7083">crucible</h2>
 <ul>
 <li>top level package config</li>
 <li>bash script to run cabal2nix for localdirs or (if not present),
@@ -617,31 +617,31 @@ github or hackage.</li>
 
 </ul>
 </section>
-<section id="slide-org7090618">
-<h3 id="org7090618">Sample specification</h3>
+<section id="slide-org56e8c1f">
+<h3 id="org56e8c1f">Sample specification</h3>
 <div class="org-src-container">
 
 <pre  class="src src-nix">{ stdenv, fetchurl, pkgconfig, libgphoto2, libexif, popt, gettext
 , libjpeg, readline, libtool
 }:
 
-stdenv.mkDerivation rec {
-  name = "gphoto2-2.5.11";
+stdenv.mkDerivation <span style="color: #b4fa70;">rec</span> {
+  <span style="color: #fcaf3e;">name</span> = <span style="color: #e9b96e;">"gphoto2-2.5.11"</span>;
 
-  src = fetchurl {
-    url = "mirror://sourceforge/gphoto/${name}.tar.bz2";
-    sha256 = "1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r";
+  <span style="color: #fcaf3e;">src</span> = fetchurl {
+    <span style="color: #fcaf3e;">url</span> = <span style="color: #e9b96e;">"mirror://sourceforge/gphoto/${name}.tar.bz2"</span>;
+    <span style="color: #fcaf3e;">sha256</span> = <span style="color: #e9b96e;">"1sgr6rsvzzagcwhc8fxbnvz3k02wr2hab0vrbvcb04k5l3b48a1r"</span>;
   };
 
-  nativeBuildInputs = [ pkgconfig gettext libtool ];
-  buildInputs = [ libgphoto2 libexif popt libjpeg readline ];
+  <span style="color: #fcaf3e;">nativeBuildInputs</span> = [ pkgconfig gettext libtool ];
+  <span style="color: #fcaf3e;">buildInputs</span> = [ libgphoto2 libexif popt libjpeg readline ];
 
-  meta = with stdenv.lib; {
-    description = "A ready to use set of digital camera software applications";
-    homepage = http://www.gphoto.org/;
-    license = licenses.gpl2Plus;
-    platforms = platforms.unix;
-    maintainers = [ maintainers.jcumming ];
+  <span style="color: #fcaf3e;">meta</span> = <span style="color: #b4fa70;">with</span> stdenv.lib; {
+    <span style="color: #fcaf3e;">description</span> = <span style="color: #e9b96e;">"A ready to use set of digital camera software applications"</span>;
+    <span style="color: #fcaf3e;">homepage</span> = <span style="color: #e9b2e3; font-weight: bold;">http://www.gphoto.org/</span>;
+    <span style="color: #fcaf3e;">license</span> = licenses.gpl2Plus;
+    <span style="color: #fcaf3e;">platforms</span> = platforms.unix;
+    <span style="color: #fcaf3e;">maintainers</span> = [ maintainers.jcumming ];
   };
 }
 </pre>
@@ -650,8 +650,8 @@ stdenv.mkDerivation rec {
 </section>
 </section>
 <section>
-<section id="slide-orgcede95c">
-<h2 id="orgcede95c">REPL</h2>
+<section id="slide-org2ec5a47">
+<h2 id="org2ec5a47">REPL</h2>
 <ul>
 <li><p>
 REPL tool for language and inspection
@@ -669,8 +669,8 @@ REPL tool for language and inspection
 </section>
 </section>
 <section>
-<section id="slide-orge470670">
-<h2 id="orge470670">Miscellaneous</h2>
+<section id="slide-org2446950">
+<h2 id="org2446950">Miscellaneous</h2>
 <ul>
 <li>Local builds are not incremental</li>
 <li>Attributes are specific but not versioned
@@ -688,7 +688,7 @@ Store can get big (that's called efficiency)
 </pre>
 <ul>
 <li>The GC roots are the profile versions.</li>
-<li>Filesystem dirent refcnts determine when removeable.</li>
+<li>Store locations unreachable from profile roots are removed</li>
 
 </ul></li>
 <li>Prefer nix-shell to nix-env
@@ -701,8 +701,8 @@ Store can get big (that's called efficiency)
 </section>
 </section>
 <section>
-<section id="slide-org9855776">
-<h2 id="org9855776">Examples</h2>
+<section id="slide-org05bf56d">
+<h2 id="org05bf56d">Examples</h2>
 <ul>
 <li>CyberChaff
 <ul>
@@ -736,8 +736,8 @@ NixOS module, deployment
 </section>
 </section>
 <section>
-<section id="slide-orgc230721">
-<h2 id="orgc230721">THE END</h2>
+<section id="slide-org91aeca6">
+<h2 id="org91aeca6">THE END</h2>
 <ul>
 <li>Nix language
 <ul>
