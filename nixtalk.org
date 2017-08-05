@@ -342,7 +342,7 @@ stdenv.mkDerivation rec {
     $ nix-collect-garbage
     #+END_EXAMPLE
     - The GC roots are the profile versions.
-    - Filesystem dirent refcnts determine when removeable.
+    - Store locations unreachable from profile roots are removed
   * Prefer nix-shell to nix-env
     - Keep your main environment minimal
 * Examples
